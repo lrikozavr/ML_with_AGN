@@ -11,3 +11,6 @@ recurs.cross.sh - cross match all catalogs in folder
 
 global_script.sh - manages all scripts 
 ./global_script.sh Catalog_space Sort_spase Identification_Window
+
+make_name.sh - add name_file column for all file in folder
+./make_name.sh foldername
