@@ -211,7 +211,14 @@ model.fit(X_train, y_train,
 model.summary()
 SaveModel(model,"/home/kiril/lrikozavr/models/mod1","/home/kiril/lrikozavr/models/weight1")
 '''
-###########
+#######################################################################################################################################################
+##### ###       ## ### ##   # ### ##   #  ####
+  #   #  #     # #  #  # #  #  #  # #  # #    #
+  #   ###     ####  #  #  # #  #  #  # # # ###
+  #   #  #   #   #  #  #   ##  #  #   ## #    #
+  #   #   # #    # ### #    # ### #    #  ####
+#######################################################################################################################################################
+'''
 train_file = '/media/kiril/j_08/AGN/excerpt/catalogue/ex_zempty_name_konf_ALL_nd_phot_1.csv'
 data_test = pd.read_csv(train_file, header=None, sep=',',dtype=np.float)
 
@@ -220,6 +227,7 @@ data_test = pd.read_csv(train_file, header=None, sep=',',dtype=np.float)
 label = [1 for i in range(data_test.shape[0])]
 
 
+#dada_test = pd.read_csv("/media/kiril/j_08/AGN/excerpt/catalogue/star_n_inf_nonzero.csv", header=None, sep=',',dtype=np.float)
 dada_test = pd.read_csv("/media/kiril/j_08/AGN/excerpt/catalogue/star_n_inf_nonzero.csv", header=None, sep=',',dtype=np.float)
 babel = [0 for i in range(dada_test.shape[0])]
 label = np.array(label)
@@ -240,9 +248,27 @@ print(train.shape[0],train.shape[1])
 num_ep = 15
 batch_size = 1024
 NN(train,label,0.25,0.25,batch_size,num_ep)
+
+'''
+#######################################################################################################################################################
+##### ###       ## ### ##   # ### ##   #  ####
+  #   #  #     # #  #  # #  #  #  # #  # #    #
+  #   ###     ####  #  #  # #  #  #  # # # ###
+  #   #  #   #   #  #  #   ##  #  #   ## #    #
+  #   #   # #    # ### #    # ### #    #  ####
+#######################################################################################################################################################
 ##########
-data_test = pd.read_csv("/media/kiril/j_08/AGN/excerpt/catalogue/LQAC3_WISE_w1_w4/LQAC3_WISE.csv", header=0, sep=',',dtype=np.float)
-data_test = data_test.drop(['RA','DEC'], axis=1)
+#data_test = pd.read_csv("/media/kiril/j_08/AGN/excerpt/catalogue/LQAC3_WISE_w1_w4/LQAC3_WISE.csv", header=0, sep=',',dtype=np.float)
+#data_test = data_test.drop(['RA','DEC'], axis=1)
+batch_size = 1024
+#######################################################################################################################################################
+##### ####  ### #####
+  #   #    #      #
+  #   ###   ##    #
+  #   #       #   #
+  #   #### ###    #
+#######################################################################################################################################################
+data_test = pd.read_csv("/media/kiril/j_08/AGN/excerpt/catalogue/AGN_sdss_n_inf_nonzero.csv", header=None, sep=',',dtype=np.float)
 
 train=DataP(data_test)
 model1 = LoadModel("/home/kiril/lrikozavr/models/mod1","/home/kiril/lrikozavr/models/weight1",'adam','binary_crossentropy')
@@ -264,8 +290,13 @@ for i in range(np.size(Class)):
 		j+=1
 print("D:	",np.size(Class)/j,"%")
 
-
-
+#######################################################################################################################################################
+##### ####  ### #####
+  #   #    #      #
+  #   ###   ##    #
+  #   #       #   #
+  #   #### ###    #
+#######################################################################################################################################################
 ##########
 '''
 label=[1 for i in range(data_test.shape[0])]
