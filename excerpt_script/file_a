@@ -1,0 +1,19 @@
+#!/bin/bash
+
+file=$1
+path=$(pwd)
+echo "$path, $file"
+cd $file
+
+sort_h() {
+cat $1 | head -n 1
+cat $1 | tail -n +2 | LC_ALL=en_US.utf8   sort -t, -k$2 -g 
+}
+
+for i in $(ls)
+do
+echo "$i"
+sort_h $i 2 > $i.i
+$path/algoritm.sh $i.i 3 4 > $i.txt
+rm $i.i
+done
