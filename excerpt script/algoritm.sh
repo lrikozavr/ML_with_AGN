@@ -36,5 +36,3 @@ rm file1_sort_2.csv
 #rm file2_sort_2.csv
 sort_h file2_sort_2.csv 2
 rm file2_sort_2.csv
-
-
