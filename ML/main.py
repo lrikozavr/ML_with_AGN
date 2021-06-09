@@ -84,7 +84,7 @@ def Rou(data):
 def DataP(data):
 	data.fillna(0)
 	data = np.array(data)
-	return Diff(data) #Rou(Diff(data))
+	return  Diff(data) #Rou(Diff(data))
 
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
@@ -166,7 +166,7 @@ filename = ['2dfFGRS_all.csv',
 'file_ex_all.csv',
 'star_shuf_all.csv']
 
-
+input_path_data = "/home/kiril/github/ML_with_AGN/ML/train/sample.csv"
 input_path_data_train = "/home/kiril/github/ML_with_AGN/ML/train/file_ex_all.csv"
 input_path_data_trash = "/home/kiril/github/ML_with_AGN/ML/train/star_shuf_all.csv"
 #######################################################################################################################################################
@@ -176,7 +176,7 @@ input_path_data_trash = "/home/kiril/github/ML_with_AGN/ML/train/star_shuf_all.c
   #   #  #   #   #  #  #   ##  #  #   ## #    #
   #   #   # #    # ### #    # ### #    #  ####
 #######################################################################################################################################################
-
+'''
 data_test = pd.read_csv(input_path_data_train, header=None, sep=',',dtype=np.float)
 label = [1 for i in range(data_test.shape[0])]
 
@@ -190,12 +190,23 @@ babel = np.array(babel)
 
 data_test = data_test.append(dada_test, ignore_index=True)
 label = np.append(label,babel,axis=0)
+'''
+data_test = pd.read_csv(input_path_data, header=None, sep=',',dtype=np.float)
 
-data_test.drop(columns=0, axis=1)
+#data_test = data_test.iloc[:, 4:8]
+label = data_test[4]
+data_test = data_test.drop(4, axis=1)
 
+#print(data_test)
+#print(label)
+#exit()
+c=0
+for i in range(label.size):
+	if(label[i]==1):
+		c+=1
 print("Data test shape:	",data_test.shape)
-print("Data dif size:	",np.size(babel),np.size(label))
-print("%",np.size(babel)/np.size(label) *100)
+print("Data val size:	",np.size(label))
+print("%",c/label.size *100)
 
 train=DataP(data_test)
 print("Data train shape:	",train.shape)
@@ -203,7 +214,7 @@ print("Data train shape:	",train.shape)
 num_ep = 25
 batch_size = 1024
 
-NN(train,label,0.25,0.25,batch_size,num_ep,optimizer,loss,output_path_predict_0,output_path_mod,output_path_weight)
+NN(train,np.array(label),0.25,0.25,batch_size,num_ep,optimizer,loss,output_path_predict_0,output_path_mod,output_path_weight)
 
 #######################################################################################################################################################
 ##### ###       ## ### ##   # ### ##   #  ####
