@@ -20,7 +20,8 @@ from keras import backend as K
 
 def DeepDenseNN(features):
     input_img = Input(shape=(features,))
-   
+    #print(input_img)
+    #input_img = Dense(128, activation='relu', kernel_initializer='he_uniform', input_shape=(features,))
     layer_1 = Dense(64, activation='linear', kernel_initializer='he_uniform' )(input_img)
     layer_2 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_1)
     layer_3 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_2)
@@ -49,7 +50,7 @@ def LoadModel(path_model, path_weights, optimizer, loss):
     return loaded_model
 
 #Разница между всеми
-def Diff(data):
+def Diff(data,flag_color):
 	stars = data.shape[0]
 	mags = data.shape[1]
 	num_colours = sum(i for i in range(mags))
@@ -61,10 +62,14 @@ def Diff(data):
 			if(i!=j):
 				colours[:,index] = data[:,j] - data[:,i]
 				index += 1
-	Result = np.append(data,colours, axis=1)
+	if(not flag_color):
+		Result = np.append(data,colours, axis=1)
+	else:
+		Result = colours
 	print("Different all Data")
 	print(Result.shape)
 	return Result
+
 #Выравнивание
 def Rou(data):
 	features = data.shape[1]
@@ -81,10 +86,10 @@ def Rou(data):
 	print("Normalisation Data")
 	return Result
 	
-def DataP(data):
+def DataP(data,flag_color):
 	data.fillna(0)
 	data = np.array(data)
-	return  Diff(data) #Rou(Diff(data))
+	return  data #Diff(data,flag_color) #Rou(Diff(data))
 
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
@@ -94,6 +99,7 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	#batch_size = 1024
 	#num_ep = 15
 	features = train.shape[1]
+	print(features)
 	model = DeepDenseNN(features)
 
 	model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
@@ -132,7 +138,6 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 				Ts += 1
 			else:
 				Fs += 1
-        
 	print("Accuracy:",              count/y_test.shape[0])
 	print("AGN precision:",     Tq/(Tq+Fq))
 	print("nonAGN precision:",    Ts/(Ts+Fs))
@@ -140,15 +145,15 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	print("nonAGN completness:",     Ts/(Ts+Fq))
 	print("AGN_F:",     2*(Tq/(Tq+Fq)*Tq/(Tq+Fs))/(Tq/(Tq+Fq)+Tq/(Tq+Fs)) )
 	print("non_AGN_F:",     2*(Ts/(Ts+Fs)*Ts/(Ts+Fq))/(Ts/(Ts+Fq)+Ts/(Ts+Fs)) )
-	
 	SaveModel(model,output_path_mod,output_path_weight)
 	#return model
-	
+
+from graf import Many_Graf_diff,Many_Graf,Many_Graf_many
 
 batch_size = 1024
 optimizer = 'adam'
 loss = 'binary_crossentropy'
-
+'''
 output_path_predict_0 = "/home/kiril/github/ML_with_AGN/ML/predict/main.csv"
 output_path_predict = "/home/kiril/github/ML_with_AGN/ML/predict/"
 
@@ -169,6 +174,28 @@ filename = ['2dfFGRS_all.csv',
 input_path_data = "/home/kiril/github/ML_with_AGN/ML/train/sample.csv"
 input_path_data_train = "/home/kiril/github/ML_with_AGN/ML/train/file_ex_all.csv"
 input_path_data_trash = "/home/kiril/github/ML_with_AGN/ML/train/star_shuf_all.csv"
+'''
+output_path_predict_0 = "/home/kiril/github/ML_with_AGN/ML/predict/sample_news.csv"
+output_path_predict = "/home/kiril/github/ML_with_AGN/ML/predict/"
+
+col_test_start_s = 2
+col_test_end_s = 5
+
+output_path_mod = "/home/kiril/github/ML_with_AGN/ML/models/mod_news"
+output_path_weight = "/home/kiril/github/ML_with_AGN/ML/models/weight_news"
+
+input_path_data_test = "/media/kiril/j_08/AGN/excerpt/exerpt_folder/news/"
+filename = ['comp_ex.csv','news_shuf_ex.csv','news_ex.csv']
+
+col_test_start_p = 2
+col_test_end_p = 5
+
+#col_label = 5
+#input_path_data = "/home/kiril/github/ML_with_AGN/ML/train/sample_news.csv"
+col_label = 4
+input_path_data = "/home/kiril/github/ML_with_AGN/ML/train/sample.csv"
+
+flag_color = 1 # 1 - only color; 0 - with main data
 #######################################################################################################################################################
 ##### ###       ## ### ##   # ### ##   #  ####
   #   #  #     # #  #  # #  #  #  # #  # #    #
@@ -193,10 +220,14 @@ label = np.append(label,babel,axis=0)
 '''
 data_test = pd.read_csv(input_path_data, header=None, sep=',',dtype=np.float)
 
-#data_test = data_test.iloc[:, 4:8]
-label = data_test[4]
-data_test = data_test.drop(4, axis=1)
 
+
+#data_test = data_test.iloc[:, 4:8]
+label = data_test[col_label]
+
+agn_sample,news_sample=[],[]
+agn_sample,news_sample=data_test[label == 1],data_test[label == 0]
+data_test = data_test.drop(col_label, axis=1)
 #print(data_test)
 #print(label)
 #exit()
@@ -208,7 +239,20 @@ print("Data test shape:	",data_test.shape)
 print("Data val size:	",np.size(label))
 print("%",c/label.size *100)
 
-train=DataP(data_test)
+data_name=['AGN','Other']
+name=['1','2','3','4','5']
+save_pic_path='/home/kiril/github/ML_with_AGN/ML/pic'
+save_pic_path_agn='/home/kiril/github/ML_with_AGN/ML/pic/pic_sample_agn'
+save_pic_path_news='/home/kiril/github/ML_with_AGN/ML/pic/pic_sample_news'
+
+
+#Many_Graf(data_test,name,save_pic_path,5)
+Many_Graf_many(agn_sample,news_sample,data_name,name,save_pic_path,col_label)
+#Many_Graf(agn_sample,name,save_pic_path_agn,5)
+#Many_Graf(news_sample,name,save_pic_path_news,5)
+exit()
+train=DataP(data_test,flag_color) 									############################flag_color
+
 print("Data train shape:	",train.shape)
 
 num_ep = 25
@@ -234,11 +278,12 @@ NN(train,np.array(label),0.25,0.25,batch_size,num_ep,optimizer,loss,output_path_
   #   #       #   #
   #   #### ###    #
 #######################################################################################################################################################
-	
-def Test(batch_size,output_path_mod,output_path_weight,optimizer,loss,input_path_data_test,output_path_predict,name):
+
+def Test(batch_size,output_path_mod,output_path_weight,optimizer,loss,input_path_data_test,output_path_predict,name,flag_color):
 	data_test = pd.read_csv(input_path_data_test+"/"+name, header=None, sep=',', dtype=np.float)
 	data_test.fillna(0)
-	train=DataP(data_test)
+	train=DataP(data_test,flag_color) 									############################flag_color
+	
 	model1 = LoadModel(output_path_mod,output_path_weight,optimizer,loss)
 	Class = model1.predict(train, batch_size)
 
@@ -259,7 +304,7 @@ def Test(batch_size,output_path_mod,output_path_weight,optimizer,loss,input_path
 	print(name+":	",j /np.size(Class) *100,"%")
 
 for i in filename:
-	Test(batch_size,output_path_mod,output_path_weight,optimizer,loss,input_path_data_test,output_path_predict,i)
+	Test(batch_size,output_path_mod,output_path_weight,optimizer,loss,input_path_data_test,output_path_predict,i,flag_color)
 
 #######################################################################################################################################################
 ##### ####  ### #####
