@@ -148,7 +148,7 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	SaveModel(model,output_path_mod,output_path_weight)
 	#return model
 
-from graf import Many_Graf_diff,Many_Graf,Many_Graf_many
+from graf import Many_Graf_diff,Many_Graf,Many_Graf_many,Many_Graf_diff_many
 
 batch_size = 1024
 optimizer = 'adam'
@@ -190,10 +190,10 @@ filename = ['comp_ex.csv','news_shuf_ex.csv','news_ex.csv']
 col_test_start_p = 2
 col_test_end_p = 5
 
-#col_label = 5
-#input_path_data = "/home/kiril/github/ML_with_AGN/ML/train/sample_news.csv"
-col_label = 4
-input_path_data = "/home/kiril/github/ML_with_AGN/ML/train/sample.csv"
+col_label = 5
+input_path_data = "/home/kiril/github/ML_with_AGN/ML/train/sample_news.csv"
+#col_label = 4
+#input_path_data = "/home/kiril/github/ML_with_AGN/ML/train/sample.csv"
 
 flag_color = 1 # 1 - only color; 0 - with main data
 #######################################################################################################################################################
@@ -247,7 +247,9 @@ save_pic_path_news='/home/kiril/github/ML_with_AGN/ML/pic/pic_sample_news'
 
 
 #Many_Graf(data_test,name,save_pic_path,5)
-Many_Graf_many(agn_sample,news_sample,data_name,name,save_pic_path,col_label)
+#Many_Graf_many(agn_sample,news_sample,data_name,name,save_pic_path,col_label)
+Many_Graf_diff_many(agn_sample,news_sample,data_name,name,save_pic_path,col_label)
+
 #Many_Graf(agn_sample,name,save_pic_path_agn,5)
 #Many_Graf(news_sample,name,save_pic_path_news,5)
 exit()

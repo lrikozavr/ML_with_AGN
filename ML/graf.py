@@ -95,7 +95,25 @@ def Many_Graf_many(data1,data2,data_name,name,save_path,count_column):
                 ax.legend(loc=1,prop={'size': 20})
                 fig.savefig(save_path+"/"+str(i1+1)+str(i2+1)+'.png')
                 plt.close(fig)
-    
+
+def Many_Graf_diff_many(data1,data2,data_name,name,save_path,count_column):
+    n=count_column
+    for i1 in range(n):
+        for i2 in range(i1,n,1):
+            for j1 in range(n):
+                for j2 in range(j1,n,1):
+                    if(not i1==i2 and not j1==j2 and not i1==j1 and not i2==j2 and i1+i2>j1+j2):
+                        fig=plt.figure()
+                        ax = fig.add_subplot(111)
+                        ax.set_xlabel(name[i1]+"-"+name[i2],fontsize=40)
+                        ax.set_ylabel(name[j1]+"-"+name[j2],fontsize=40)
+                        fig.set_size_inches(20,20)
+                        Graf_m(ax,data1[i1],data1[i2],data1[j1],data1[j2],3,data_name[0])
+                        Graf_m(ax,data2[i1],data2[i2],data2[j1],data2[j2],2,data_name[1])
+                        ax.legend(loc=1,prop={'size': 20})
+                        fig.savefig(save_path+"/"+str(i1+1)+str(i2+1)+str(j1+1)+str(j2+1)+'.png')
+                        plt.close(fig)
+            
             
 ################
 '''
