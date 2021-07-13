@@ -47,7 +47,7 @@ awk -F, '{
             else{printf("%s\n",$i)}
         }
     }
-}'
-
-sort_h file2_sort_2.csv 2
+}' file2_sort_2.csv > file2_sort_2_cut.csv
 rm file2_sort_2.csv
+sort_h file2_sort_2_cut.csv 2
+rm file2_sort_2_cut.csv
