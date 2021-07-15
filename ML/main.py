@@ -300,23 +300,6 @@ save_pic_path_news='/home/kiril/github/ML_with_AGN/ML/pic/pic_sample_news'
 
 #Many_Graf(agn_sample,name,save_pic_path_agn,5)
 #Many_Graf(news_sample,name,save_pic_path_news,5)
-input_path_data_agn = ""
-input_path_data_star = "/home/kiril/github/ML_with_AGN/ML/train_/star_sh.csv"
-input_path_data_qso = "/home/kiril/github/ML_with_AGN/ML/train_/qso_sh.csv"
-input_path_data_gal = "/home/kiril/github/ML_with_AGN/ML/train_/gal_sh.csv"
-
-data_agn = pd.read_csv(input_path_data_agn, header=0, sep=',',dtype=np.float)
-data_star = pd.read_csv(input_path_data_star, header=0, sep=',',dtype=np.float)
-data_qso = pd.read_csv(input_path_data_qso, header=0, sep=',',dtype=np.float)
-data_gal = pd.read_csv(input_path_data_gal, header=0, sep=',',dtype=np.float)
-
-data_agn_star = data_agn.append(data_star, ignore_index=True)
-data_agn_qso = data_agn.append(data_qso, ignore_index=True)
-data_agn_gal = data_agn.append(data_gal, ignore_index=True)
-data_agn_star_qso = data_agn_star.append(data_qso, ignore_index=True)
-data_agn_star_gal = data_agn_star.append(data_gal, ignore_index=True)
-data_agn_qso_gal = data_agn_qso.append(data_gal, ignore_index=True)
-data_agn_star_qso_gal = data_agn_star_qso.append(data_gal, ignore_index=True)
 
 
 train=DataP(data_test,flag_color) 									############################flag_color
