@@ -97,24 +97,59 @@ def Many_Graf_many(data1,data2,data_name,name,save_path,count_column):
                 plt.close(fig)
 
 def Many_Graf_pd(data,save_path):
-    name_list = data['name'].unique()
-    data_ = data.drop(['name'], axis=1)
-    name_column = np.array(data.columns.values)
+    name = data['name'].unique()
+    name=np.flip(name)
+    name_list = data['name']
+    data_ = data.drop(['name'],axis=1)
+    name_column = np.array(data_.columns.values)
+    print(name_column)
     n = len(name_column)
     for i1 in range(n):
         for i2 in range(i1,n,1):
-            if(not i1==i2):
-                fig=plt.figure()
-                ax = fig.add_subplot(111)
-                ax.set_xlabel(name_column[i1],fontsize=40)
-                ax.set_ylabel(name_column[i2],fontsize=40)
-                fig.set_size_inches(20,20)
-                for name_ in name_list:
-                    data_0 = data_[name_list == name_]
-                    Graf_m(ax,data_0[name_column[i1]],0,data_[name_column[i2]],0,3,name_)
-                ax.legend(loc=1,prop={'size': 20})
-                fig.savefig(save_path+"/"+str(i1+1)+str(i2+1)+'.png')
-                plt.close(fig)
+            fig=plt.figure()
+            ax = fig.add_subplot(111)
+            ax.set_xlabel(name_column[i1],fontsize=40)
+            ax.set_ylabel(name_column[i2],fontsize=40)
+            fig.set_size_inches(20,20)
+            index=2
+            #print(data_.columns.values)
+            for name_ in name:
+                data_0 = data_[name_list == name_]
+                Graf_m(ax,data_0[name_column[i1]],0,data_0[name_column[i2]],0,index,name_)
+                index+=1
+            ax.legend(loc=1,prop={'size': 20})
+            fig.savefig(save_path+"/"+str(i1+1)+str(i2+1)+'.png')
+            plt.close(fig)
+
+def Many_Graf_pd_diff(data,save_path):
+    name = data['name'].unique()
+    name=np.flip(name)
+    name_list = data['name']
+    data_ = data.drop(['name'],axis=1)
+    name_column = np.array(data_.columns.values)
+    print(name_column)
+    n = len(name_column)
+    for i1 in range(n):
+        for i2 in range(i1,n,1):
+            for j1 in range(n):
+                for j2 in range(j1,n,1):
+                    if(not i1==i2 and not j1==j2 and not i1==j1 and not i2==j2 and i1+i2>j1+j2):
+                        fig=plt.figure()
+                        ax = fig.add_subplot(111)
+                        ax.set_xlabel(name_column[i1] + "-" + name_column[i2],fontsize=40)
+                        ax.set_ylabel(name_column[j1] + "-" + name_column[j2],fontsize=40)
+                        fig.set_size_inches(20,20)
+                        index=2
+                        #print(data_.columns.values)
+                        for name_ in name:
+                            data_0 = data_[name_list == name_]
+                            #Graf_m(ax,data_0[name_column[i1]],0,data_0[name_column[i2]],0,index,name_)
+                            Graf_m(ax,data_0[name_column[i1]],data_0[name_column[i2]],data_0[name_column[j1]],data_0[name_column[j2]],index,name_)
+                            index+=1
+                        ax.legend(loc=1,prop={'size': 20})
+                        fig.savefig(save_path+"/"+str(i1+1)+str(i2+1)+str(j1+1)+str(j2+1)+'.png')
+                        plt.close(fig)
+
 
 def Many_Graf_diff_many(data1,data2,data_name,name,save_path,count_column):
     n=count_column

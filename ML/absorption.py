@@ -37,5 +37,17 @@ class Extinction:
         return EBV.correction(ebv)
 
 
-extinction = Extinction()
-mass['E(B-V)'] = extinction.get(catalogue['ra'].tolist(),catalogue['dec'].tolist())
+#extinction = Extinction()
+#mass['E(B-V)'] = extinction.get(catalogue['ra'].tolist(),catalogue['dec'].tolist())
+
+def dust_SFD(ra,dec):
+    from dustmaps.config import config
+    config['data_dir'] = '/media/kiril/j_08/dust_map/'
+    from astropy.coordinates import SkyCoord
+    from astropy import units as u
+    from dustmaps.sfd import SFDQuery
+    coords = SkyCoord(ra=ra, dec=dec, unit=(u.degree,u.degree))
+    coords.galactic
+    sfd = SFDQuery()
+    rezult = sfd(coords)
+    return rezult
