@@ -79,4 +79,4 @@ class HiPS():
         return {band: url for band, url in SURVEYS.items() if band in bands_to_show}
 
 first = HiPS()
-print(first.download_image("CDS/P/PanSTARRS/DR1/color-i-r-g",0.005,50,60))
+print(first.download_image("CDS/P/PanSTARRS/DR1/g",0.005,50,60))
