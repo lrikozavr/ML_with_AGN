@@ -1,11 +1,15 @@
-#!/home/lrikozavr/py_env/ML/bin/python
+#!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
 
 import subprocess
 import requests
+import os
 import numpy as np
 #pip install streamlit
+#pip install --upgrade pip
 import streamlit as st
+
+import requests
 
 from urllib.parse import quote
 #pip install astropy
@@ -14,7 +18,7 @@ from astropy.io import fits
 #from .cutout import CutoutService
 #from settings import IMG_SIZE
 
-IMG_SIZE = 160
+IMG_SIZE = 40
 
 SURVEYS = {
     "PS1_color-i-r-g": "CDS/P/PanSTARRS/DR1/color-i-r-g",
@@ -52,8 +56,11 @@ class HiPS():
         return bands_to_show
 
     @classmethod
-    def url(cls, hips, width, height, fov, ra, dec):
-        return f"{BASE_URL}hips={quote(hips)}&width={width}&height={height}&fov={fov}&projection=TAN&coordsys=icrs&ra={ra}&dec={dec}"
+    def url(cls, hips, width, height, fov, ra, dec, format):
+        if(format == "jpg"):
+            return f"{BASE_URL}hips={quote(hips)}&width={width}&height={height}&format={format}&fov={fov}&projection=TAN&coordsys=icrs&ra={ra}&dec={dec}"
+        else:
+            return f"{BASE_URL}hips={quote(hips)}&width={width}&height={height}&fov={fov}&projection=TAN&coordsys=icrs&ra={ra}&dec={dec}"
 
     @classmethod
     def get_image(cls, url):
@@ -75,8 +82,42 @@ class HiPS():
         return cls.fix_dims(img)
 
     @classmethod
+    def save_image_fits(cls,url,save_path):
+        with fits.open(url, cache=False) as hdul:
+            hdul.verify("fix")
+            hdul.writeto(f"{save_path}")
+
+    @classmethod
+    def save_image_jpg(cls,url,save_path):
+        response = requests.get(url)
+        if response.status_code == 200:
+            with open(save_path,'wb') as file:
+                file.write(response.content)
+        else:
+            print(f"Error code: {response.status_code}")
+
+    @classmethod
     def get_bands_to_download(cls, bands_to_show):
         return {band: url for band, url in SURVEYS.items() if band in bands_to_show}
 
-first = HiPS()
-print(first.download_image("CDS/P/PanSTARRS/DR1/g",0.005,50,60))
+save_path_jpg = "/home/kiril/github/ML_with_AGN/ML/image_download/jpeg"
+save_path_fits = "/home/kiril/github/ML_with_AGN/ML/image_download/fits"
+
+ra=50
+dec=60
+
+def dir(save_path,name):
+    dir_name = f"{save_path}/{name}"
+    if not os.path.isdir(dir_name):
+        os.mkdir(dir_name)
+        
+def download_image(ra,dec):
+    dir_name = f"{ra}_{dec}"
+    dir(save_path_jpg,dir_name)
+    dir(save_path_fits,dir_name)
+    first = HiPS()
+    for band,link in SURVEYS.items():
+        url_jpg = first.url(link,IMG_SIZE,IMG_SIZE,0.0028,ra,dec,"jpg")    
+        url_fits = first.url(link,IMG_SIZE,IMG_SIZE,0.0028,ra,dec,"fits")
+        first.save_image_fits(url_fits,f"{save_path_fits}/{ra}_{dec}/{band}.fits")
+        first.save_image_jpg(url_jpg,f"{save_path_jpg}/{ra}_{dec}/{band}.png")
