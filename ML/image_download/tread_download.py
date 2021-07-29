@@ -7,14 +7,14 @@ MAX_WORKERS = 6
 WAIT_UNTIL_REPEAT_ACCESS = 2
 
 
-def thread_download(cutout_service, bands_to_download, fov, ra, dec):
+def thread_download(cutout_service, bands_to_download, fov, ra, dec, save_path):
     attempts = 0
     while attempts < NUM_URL_ACCESS_ATTEMPTS:
         try:
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
                 results = {
                     band: executor.submit(
-                        cutout_service.download_image, url, fov, ra, dec
+                        cutout_service.save_fits_jpg, url, fov, ra, dec, save_path, band
                     )
                     for band, url in bands_to_download.items()
                 }

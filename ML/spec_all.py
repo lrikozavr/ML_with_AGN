@@ -120,9 +120,28 @@ def test(data):
 
 #test(data_agn_star)
 #test(data_agn_qso)
-test(data_agn_gal)
+#test(data_agn_gal)
 #test(data_agn_star_qso)
 
 #test(data_agn_star_gal)
 #test(data_agn_qso_gal)
+
+
+
+
+
 #test(data_agn_star_qso_gal)
+import sys
+sys.path.insert(1, 'image_download')
+from image_download import download_image
+from tread_download import thread_download
+def data_download(data):
+    #print(data)
+    n = data.shape[0]
+    for i in range(n):
+        #print(float(data['RA'][i]))
+        download_image(float(data['RA'][i]),float(data['DEC'][i]))
+#thread_download(download_image,float(data['RA'][i]),float(data['DEC'][i]))
+data_download(data_agn)
+
+#download_image(200,50)

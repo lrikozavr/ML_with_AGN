@@ -1,6 +1,7 @@
 #!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
 
+from tread_download import thread_download
 import subprocess
 import requests
 import os
@@ -18,7 +19,7 @@ from astropy.io import fits
 #from .cutout import CutoutService
 #from settings import IMG_SIZE
 
-IMG_SIZE = 40
+IMG_SIZE = 100
 
 SURVEYS = {
     "PS1_color-i-r-g": "CDS/P/PanSTARRS/DR1/color-i-r-g",
@@ -82,24 +83,35 @@ class HiPS():
         return cls.fix_dims(img)
 
     @classmethod
-    def save_image_fits(cls,url,save_path):
-        with fits.open(url, cache=False) as hdul:
+    def save_image_fits(cls,link,fov,ra,dec,save_path,band):
+        url_fits = cls.url(link,IMG_SIZE,IMG_SIZE,fov,ra,dec,"fits")
+        with fits.open(url_fits, cache=False) as hdul:
             hdul.verify("fix")
-            hdul.writeto(f"{save_path}")
+            file = f"{save_path}/fits/{ra}_{dec}/{band}.fits"
+            if os.path.isfile(file):
+                os.remove(file)
+            hdul.writeto(file)
 
     @classmethod
-    def save_image_jpg(cls,url,save_path):
-        response = requests.get(url)
+    def save_image_jpg(cls,link,fov,ra,dec,save_path,band):
+        url_jpg = cls.url(link,IMG_SIZE,IMG_SIZE,fov,ra,dec,"jpg")
+        response = requests.get(url_jpg)
         if response.status_code == 200:
-            with open(save_path,'wb') as file:
+            with open(f"{save_path}/jpeg/{ra}_{dec}/{band}.png",'wb') as file:
                 file.write(response.content)
         else:
             print(f"Error code: {response.status_code}")
 
     @classmethod
+    def save_fits_jpg(cls,link,fov,ra,dec,save_path,band):
+        cls.save_image_fits(link,fov,ra,dec,save_path,band)
+        cls.save_image_jpg(link,fov,ra,dec,save_path,band)
+
+    @classmethod
     def get_bands_to_download(cls, bands_to_show):
         return {band: url for band, url in SURVEYS.items() if band in bands_to_show}
 
+save_path = "/home/kiril/github/ML_with_AGN/ML/image_download"
 save_path_jpg = "/home/kiril/github/ML_with_AGN/ML/image_download/jpeg"
 save_path_fits = "/home/kiril/github/ML_with_AGN/ML/image_download/fits"
 
@@ -116,8 +128,4 @@ def download_image(ra,dec):
     dir(save_path_jpg,dir_name)
     dir(save_path_fits,dir_name)
     first = HiPS()
-    for band,link in SURVEYS.items():
-        url_jpg = first.url(link,IMG_SIZE,IMG_SIZE,0.0028,ra,dec,"jpg")    
-        url_fits = first.url(link,IMG_SIZE,IMG_SIZE,0.0028,ra,dec,"fits")
-        first.save_image_fits(url_fits,f"{save_path_fits}/{ra}_{dec}/{band}.fits")
-        first.save_image_jpg(url_jpg,f"{save_path_jpg}/{ra}_{dec}/{band}.png")
+    thread_download(first, SURVEYS, 0.0028, ra, dec, save_path)
