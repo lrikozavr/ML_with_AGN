@@ -139,11 +139,17 @@ def PreProcesing(origin_path,main_name,trash_name):
 			plt.imshow(images[i].np().astype("uint8"))
 			plt.title(int(labels[i]))
 			plt.axis("off")
-	
 
+	train_ds = train_ds.prefetch(buffer_size=32)
+	val_ds = val_ds.prefetch(buffer_size=32)
+	return train_ds, val_ds
 
-def ImageNN():
-
+def ImageNN(image_size,train_ds,val_ds,epochs):
+	model = ImageDeepDenseNN(image_size)
+	model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+	model.fit(train_ds, epochs=epochs, validation_data=val_ds)
+	model.summary()
+	return model
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
 	X_train, X_test, y_train, y_test = train_test_split(train, label, 
