@@ -97,7 +97,7 @@ class HiPS():
         url_jpg = cls.url(link,IMG_SIZE,IMG_SIZE,fov,ra,dec,"jpg")
         response = requests.get(url_jpg)
         if response.status_code == 200:
-            with open(f"{save_path}/jpeg/{ra}_{dec}/{band}.png",'wb') as file:
+            with open(f"{save_path}/jpg/{ra}_{dec}/{band}.png",'wb') as file:
                 file.write(response.content)
         else:
             print(f"Error code: {response.status_code}")
@@ -111,12 +111,9 @@ class HiPS():
     def get_bands_to_download(cls, bands_to_show):
         return {band: url for band, url in SURVEYS.items() if band in bands_to_show}
 
-save_path = "/home/kiril/github/ML_with_AGN/ML/image_download"
+save_path = "/home/kiril/github/ML_data/GALAXY/image_download"
 save_path_jpg = "/home/kiril/github/ML_with_AGN/ML/image_download/jpeg"
 save_path_fits = "/home/kiril/github/ML_with_AGN/ML/image_download/fits"
-
-ra=50
-dec=60
 
 def dir(save_path,name):
     dir_name = f"{save_path}/{name}"
@@ -125,7 +122,9 @@ def dir(save_path,name):
         
 def download_image(ra,dec):
     dir_name = f"{ra}_{dec}"
-    dir(save_path_jpg,dir_name)
-    dir(save_path_fits,dir_name)
+    dir(save_path,"jpg")
+    dir(save_path,"fits")
+    dir(f"{save_path}/jpg",dir_name)
+    dir(f"{save_path}/fits",dir_name)
     first = HiPS()
     thread_download(first, SURVEYS, 0.0028, ra, dec, save_path)

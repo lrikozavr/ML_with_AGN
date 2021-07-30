@@ -140,6 +140,6 @@ def data_download(data):
     for i in range(n):
         #print(float(data['RA'][i]))
         download_image(float(data['RA'][i]),float(data['DEC'][i]))
-data_download(data_agn)
+data_download(data_gal)
 
 #download_image(200,50)

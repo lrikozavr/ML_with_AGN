@@ -1,7 +1,9 @@
 #!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
 #from keras.layers.normalization import BatchNormalization
-from keras.layers import Input, Dense
+import os
+
+from keras.layers import * #Input, Dense, Dropout
 from keras.models import Model
 from keras.layers.normalization import BatchNormalization
 
@@ -10,16 +12,66 @@ import tensorflow as tf
 from keras import backend as K
 import numpy as np
 
+def ImageDeepDenseNN(input_shape):
+	inputs = Input(shape=input_shape)
+    # Image augmentation block
+    x = data_augmentation(inputs)
+
+    # Entry block
+    x = experimental.preprocessing.Rescaling(1.0 / 255)(x)
+    x = Conv2D(32, 3, strides=2, padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+
+    x = Conv2D(64, 3, padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+
+    previous_block_activation = x  # Set aside residual
+
+    for size in [128, 256, 512, 728]:
+        x = Activation("relu")(x)
+        x = SeparableConv2D(size, 3, padding="same")(x)
+        x = BatchNormalization()(x)
+
+        x = Activation("relu")(x)
+        x = SeparableConv2D(size, 3, padding="same")(x)
+        x = BatchNormalization()(x)
+
+        x = MaxPooling2D(3, strides=2, padding="same")(x)
+
+        # Project residual
+        residual = Conv2D(size, 1, strides=2, padding="same")(
+            previous_block_activation
+        )
+        x = add([x, residual])  # Add back residual
+        previous_block_activation = x  # Set aside next residual
+
+    x = SeparableConv2D(1024, 3, padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+
+    x = GlobalAveragePooling2D()(x)
+
+    x = Dropout(0.5)(x)
+    outputs = Dense(1, activation="sigmoid")(x)
+    return Model(inputs, outputs)
+
 def DeepDenseNN(features):
     input_img = Input(shape=(features,))
     #print(input_img)
     #input_img = Dense(128, activation='relu', kernel_initializer='he_uniform', input_shape=(features,))
     layer_1 = Dense(64, activation='linear', kernel_initializer='he_uniform' )(input_img)
-    layer_2 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_1)
-    layer_3 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_2)
-    layer_4 = Dense(8, activation='tanh', kernel_initializer='he_uniform' )(layer_3)
-    layer_5 = Dense(4, activation='elu', kernel_initializer='he_uniform' )(layer_4)
-    Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform')(layer_5)    
+    layer_2 = Dropout(.5, input_shape=(features,))(layer_1)
+    layer_3 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_2)
+    layer_4 = Dropout(.5, input_shape=(features,))(layer_3)
+    layer_5 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_4)
+    layer_6 = Dropout(.5, input_shape=(features,))(layer_5)
+    layer_7 = Dense(8, activation='tanh', kernel_initializer='he_uniform' )(layer_6)
+    layer_8 = Dropout(.5, input_shape=(features,))(layer_7)
+    layer_9 = Dense(4, activation='elu', kernel_initializer='he_uniform' )(layer_8)
+    layer_10 = Dropout(.5, input_shape=(features,))(layer_9)
+    Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform')(layer_10)    
     model = Model(input_img, Label)
     return model
 
@@ -40,6 +92,58 @@ def LoadModel(path_model, path_weights, optimizer, loss):
     print("Model is loaded from disk\n")
     loaded_model.compile(optimizer=optimizer, loss=loss)
     return loaded_model
+
+def PreProcesing(origin_path,main_name,trash_name):
+	num_skipped = 0
+	for folder_name in (main_name, trash_name):
+		folder_path = f"{origin_path}/{folder_name}"
+		for fname in os.listdir(folder_path):
+			fpath = f"{folder_path}/{fname}"
+			try:
+				fobj = open(fpath, "rb")
+				is_jfif = tf.compat.as_bytes("JFIF") in fobj.peek(10)
+			finally:
+				fobj.close()
+
+			if not is_jfif:
+				num_skipped += 1
+				# Delete corrupted image
+				os.remove(fpath)
+	print("Deleted %d images" % num_skipped)
+	
+	image_size = (180, 180)
+	batch_size = 32
+
+	train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+		origin_path,
+		validation_split=0.2,
+		subset="training",
+		seed=1337,
+		image_size=image_size,
+		batch_size=batch_size,
+	)
+	val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+		origin_path,
+		validation_split=0.2,
+		subset="validation",
+		seed=1337,
+		image_size=image_size,
+		batch_size=batch_size,
+	)
+	import matplotlib.pyplot as plt
+
+	plt.figure(figsize=(10, 10))
+	for images, labels in train_ds.take(1):
+		for i in range(9):
+			ax = plt.subplot(3, 3, i + 1)
+			plt.imshow(images[i].np().astype("uint8"))
+			plt.title(int(labels[i]))
+			plt.axis("off")
+	
+
+
+def ImageNN():
+
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
 	X_train, X_test, y_train, y_test = train_test_split(train, label, 
