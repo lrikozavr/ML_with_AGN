@@ -111,9 +111,7 @@ def PreDelete(origin_path,main_name,trash_name):
 				os.remove(fpath)
 	print("Deleted %d images" % num_skipped)
 
-def PreProcesing(image_size,batch_size,origin_path,main_name,trash_name):
-	image_size = (100, 100)
-	batch_size = 32
+def PreProcesing(image_size,batch_size,origin_path):
 
 	train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 		origin_path,
@@ -146,22 +144,42 @@ def PreProcesing(image_size,batch_size,origin_path,main_name,trash_name):
 	val_ds = val_ds.prefetch(buffer_size=32)
 	return train_ds, val_ds
 
-def ImageNN(image_size,train_ds,val_ds,epochs,path_model,path_weights):
+def ImageNN(image_size,batch_size,train_ds,val_ds,epochs,path_model,path_weights):
 	model = ImageDeepDenseNN(image_size)
 	model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-	model.fit(train_ds, epochs=epochs, validation_data=val_ds)
+	model.fit(train_ds, epochs=epochs, validation_data=val_ds, batch_size)
 	model.summary()
 	SaveModel(model,path_model,path_weights)
 
-def TestNN(path_model,path_weights,test_path,image_size,batch_size):
+def TestNN(test_path,image_size,batch_size,path_model,path_weights):
 	model = LoadModel(path_model,path_weights)
 	test_sample = tf.keras.preprocessing.image_dataset_from_directory(
 		test_path,
 		image_size=image_size,
 		batch_size=batch_size
 	)
-	return model.predict(test_sample, batch_size)
-	
+	predict = model.predict(test_sample, batch_size)
+	count = len(predict)
+	one = 0
+	for i in range(count):
+		if(predict[i] > 0.5):
+			one += 1
+	print(f"Accuracy of test sample:	{(one/count)*100}%")
+
+def Image_ML(origin_path, image_size, batch_size, epochs, path_model, path_weights):
+	train_ds, val_ds = PreProcesing(image_size,batch_size,origin_path)
+	ImageNN(image_size,batch_size,train_ds,val_ds,epochs,path_model,path_weights)
+	TestNN(test_path,image_size,batch_size,path_model,path_weights)
+
+def Start_IMG():
+	image_size = (100, 100)
+	batch_size = 32
+	epochs = 50
+	origin_path = 
+	path_model =
+	path_weights =
+	Image_ML(origin_path, image_size, batch_size, epochs, path_model, path_weights)
+
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
 	X_train, X_test, y_train, y_test = train_test_split(train, label, 
