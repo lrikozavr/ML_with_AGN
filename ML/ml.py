@@ -15,10 +15,10 @@ import numpy as np
 def ImageDeepDenseNN(input_shape):
 	inputs = Input(shape=input_shape)
     # Image augmentation block
-    x = data_augmentation(inputs)
+    #x = data_augmentation(inputs)
 
     # Entry block
-    x = experimental.preprocessing.Rescaling(1.0 / 255)(x)
+    x = experimental.preprocessing.Rescaling(1.0 / 255)(inputs)
     x = Conv2D(32, 3, strides=2, padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
@@ -93,7 +93,7 @@ def LoadModel(path_model, path_weights, optimizer, loss):
     loaded_model.compile(optimizer=optimizer, loss=loss)
     return loaded_model
 
-def PreProcesing(origin_path,main_name,trash_name):
+def PreDelete(origin_path,main_name,trash_name):
 	num_skipped = 0
 	for folder_name in (main_name, trash_name):
 		folder_path = f"{origin_path}/{folder_name}"
@@ -110,8 +110,9 @@ def PreProcesing(origin_path,main_name,trash_name):
 				# Delete corrupted image
 				os.remove(fpath)
 	print("Deleted %d images" % num_skipped)
-	
-	image_size = (180, 180)
+
+def PreProcesing(image_size,batch_size,origin_path,main_name,trash_name):
+	image_size = (100, 100)
 	batch_size = 32
 
 	train_ds = tf.keras.preprocessing.image_dataset_from_directory(
@@ -130,6 +131,7 @@ def PreProcesing(origin_path,main_name,trash_name):
 		image_size=image_size,
 		batch_size=batch_size,
 	)
+
 	import matplotlib.pyplot as plt
 
 	plt.figure(figsize=(10, 10))
@@ -144,12 +146,22 @@ def PreProcesing(origin_path,main_name,trash_name):
 	val_ds = val_ds.prefetch(buffer_size=32)
 	return train_ds, val_ds
 
-def ImageNN(image_size,train_ds,val_ds,epochs):
+def ImageNN(image_size,train_ds,val_ds,epochs,path_model,path_weights):
 	model = ImageDeepDenseNN(image_size)
 	model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
 	model.fit(train_ds, epochs=epochs, validation_data=val_ds)
 	model.summary()
-	return model
+	SaveModel(model,path_model,path_weights)
+
+def TestNN(path_model,path_weights,test_path,image_size,batch_size):
+	model = LoadModel(path_model,path_weights)
+	test_sample = tf.keras.preprocessing.image_dataset_from_directory(
+		test_path,
+		image_size=image_size,
+		batch_size=batch_size
+	)
+	return model.predict(test_sample, batch_size)
+	
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
 	X_train, X_test, y_train, y_test = train_test_split(train, label, 
