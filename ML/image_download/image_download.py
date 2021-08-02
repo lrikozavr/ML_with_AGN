@@ -97,7 +97,7 @@ class HiPS():
         url_jpg = cls.url(link,IMG_SIZE,IMG_SIZE,fov,ra,dec,"jpg")
         response = requests.get(url_jpg)
         if response.status_code == 200:
-            with open(f"{save_path}/jpg/{ra}_{dec}/{band}.png",'wb') as file:
+            with open(f"{save_path}/jpg/{ra}_{dec}/{band}.jpg",'wb') as file:
                 file.write(response.content)
         else:
             print(f"Error code: {response.status_code}")
@@ -128,3 +128,19 @@ def download_image(ra,dec):
     dir(f"{save_path}/fits",dir_name)
     first = HiPS()
     thread_download(first, SURVEYS, 0.0028, ra, dec, save_path)
+
+def convert_image(path):
+    from PIL import Image
+    for name in os.listdir(path):
+        n = name.split(".")
+        index = 0
+        for i in n:
+            if i != "png":
+                index+=1
+        line = ""
+        for i in range(index):
+            line += n[i]
+        im = Image.open(f"{path}/{name}")
+        rgb_im = im.convert('RGB')
+        rgb_im.save(f"{path}/{line}.jpg")
+        os.remove(f"{path}/{name}")

@@ -3,26 +3,29 @@
 #from keras.layers.normalization import BatchNormalization
 import os
 
-from keras.layers import * #Input, Dense, Dropout
+from keras.layers import Input, Dense, Dropout
+from keras.layers import experimental, Conv2D, SeparableConv2D, MaxPooling2D, GlobalAveragePooling2D, Activation, add
 from keras.models import Model
 from keras.layers.normalization import BatchNormalization
+
 
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from keras import backend as K
 import numpy as np
 
+
 def ImageDeepDenseNN(input_shape):
-	inputs = Input(shape=input_shape)
+    inputs = Input(shape=input_shape)
     # Image augmentation block
-    #x = data_augmentation(inputs)
+    
 
     # Entry block
     x = experimental.preprocessing.Rescaling(1.0 / 255)(inputs)
     x = Conv2D(32, 3, strides=2, padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
-
+    '''
     x = Conv2D(64, 3, padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
@@ -50,7 +53,7 @@ def ImageDeepDenseNN(input_shape):
     x = SeparableConv2D(1024, 3, padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
-
+    '''
     x = GlobalAveragePooling2D()(x)
 
     x = Dropout(0.5)(x)
@@ -118,47 +121,55 @@ def PreProcesing(image_size,batch_size,origin_path):
 		validation_split=0.2,
 		subset="training",
 		seed=1337,
+		#color_mode="grayscale",
+		#label_mode="binary",
 		image_size=image_size,
-		batch_size=batch_size,
+		batch_size=batch_size
 	)
 	val_ds = tf.keras.preprocessing.image_dataset_from_directory(
 		origin_path,
 		validation_split=0.2,
 		subset="validation",
 		seed=1337,
+		#color_mode="grayscale",
+		#label_mode="binary",
 		image_size=image_size,
-		batch_size=batch_size,
+		batch_size=batch_size
 	)
-
+	'''
 	import matplotlib.pyplot as plt
 
 	plt.figure(figsize=(10, 10))
 	for images, labels in train_ds.take(1):
 		for i in range(9):
 			ax = plt.subplot(3, 3, i + 1)
-			plt.imshow(images[i].np().astype("uint8"))
+			plt.imshow(images[i].numpy().astype("uint8"))
 			plt.title(int(labels[i]))
 			plt.axis("off")
-
+	'''
+	print(len(train_ds), len(val_ds))
 	train_ds = train_ds.prefetch(buffer_size=32)
 	val_ds = val_ds.prefetch(buffer_size=32)
+	print(train_ds)
 	return train_ds, val_ds
 
 def ImageNN(image_size,batch_size,train_ds,val_ds,epochs,path_model,path_weights):
-	model = ImageDeepDenseNN(image_size)
+	print(val_ds)
+	model = ImageDeepDenseNN(input_shape=image_size + (3,))
 	model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-	model.fit(train_ds, epochs=epochs, validation_data=val_ds, batch_size)
+	model.fit(train_ds, epochs=epochs, validation_data=val_ds, batch_size=batch_size)
 	model.summary()
 	SaveModel(model,path_model,path_weights)
 
 def TestNN(test_path,image_size,batch_size,path_model,path_weights):
-	model = LoadModel(path_model,path_weights)
+	model = LoadModel(path_model,path_weights,optimizer="adam", loss="binary_crossentropy")
 	test_sample = tf.keras.preprocessing.image_dataset_from_directory(
 		test_path,
 		image_size=image_size,
 		batch_size=batch_size
 	)
 	predict = model.predict(test_sample, batch_size)
+	print(predict)
 	count = len(predict)
 	one = 0
 	for i in range(count):
@@ -166,7 +177,7 @@ def TestNN(test_path,image_size,batch_size,path_model,path_weights):
 			one += 1
 	print(f"Accuracy of test sample:	{(one/count)*100}%")
 
-def Image_ML(origin_path, image_size, batch_size, epochs, path_model, path_weights):
+def Image_ML(origin_path, image_size, batch_size, epochs, test_path, path_model, path_weights):
 	train_ds, val_ds = PreProcesing(image_size,batch_size,origin_path)
 	ImageNN(image_size,batch_size,train_ds,val_ds,epochs,path_model,path_weights)
 	TestNN(test_path,image_size,batch_size,path_model,path_weights)
@@ -175,11 +186,17 @@ def Start_IMG():
 	image_size = (100, 100)
 	batch_size = 32
 	epochs = 50
-	origin_path = 
-	path_model =
-	path_weights =
-	Image_ML(origin_path, image_size, batch_size, epochs, path_model, path_weights)
-
+	main_path = "/home/kiril/github/ML_data/test"
+	
+	for name in os.listdir(main_path):
+		origin_path = f"{main_path}/{name}"
+		test_path = origin_path
+		path_model = f"/home/kiril/github/ML_with_AGN/ML/models/model_img_{name}"
+		path_weights = f"/home/kiril/github/ML_with_AGN/ML/models/weights_img_{name}"
+		_name = os.listdir(origin_path)
+		PreDelete(origin_path,_name[0],_name[1])
+		Image_ML(origin_path, image_size, batch_size, epochs, test_path, path_model, path_weights)
+	
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
 	X_train, X_test, y_train, y_test = train_test_split(train, label, 

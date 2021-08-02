@@ -1,6 +1,6 @@
 #!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
-
+'''
 import pandas as pd
 import numpy as np
 
@@ -94,7 +94,7 @@ def test(data):
     train=DataP(data,0) 
     print("Data train shape:	",train.shape)
     NN(train,np.array(label),0.25,0.25,batch_size,num_ep,optimizer,loss,local_output_path_predict,local_output_path_mod,local_output_path_weight)
-    '''
+    #''
     time.sleep(100000)
 
 	agn_sample=DataP(agn_sample,0) 									############################flag_color
@@ -116,7 +116,7 @@ def test(data):
 			#Class[i] = 1
 			j+=1
 	print(name+":	",j /np.size(Class) *100,"%")
-    '''
+    #''
 
 #test(data_agn_star)
 #test(data_agn_qso)
@@ -140,6 +140,15 @@ def data_download(data):
     for i in range(n):
         #print(float(data['RA'][i]))
         download_image(float(data['RA'][i]),float(data['DEC'][i]))
-data_download(data_gal)
+#data_download(data_gal)
 
 #download_image(200,50)
+
+'''
+#import sys
+#sys.path.insert(1, 'image_download')
+#from image_download import convert_image
+#convert_image("/home/kiril/github/ML_data/test/AGN")
+#convert_image("/home/kiril/github/ML_data/test/GALAXY")
+from ml import Start_IMG
+Start_IMG()
