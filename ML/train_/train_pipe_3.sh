@@ -143,4 +143,3 @@ change "allwise"
 ps1 $catalogue $col1 > ${k[0]}_ps1.csv
 change "ps1"
 gaia_dr3 $catalogue $col1 > ${k[0]}_gaiadr3.csv
-rm 

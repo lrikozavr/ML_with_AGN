@@ -1,13 +1,14 @@
-#!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
 
 import time
 from concurrent.futures import ThreadPoolExecutor
+import streamlit as st
+import subprocess
+from astropy.io import fits
+import requests
+from urllib.parse import quote
 
-NUM_URL_ACCESS_ATTEMPTS = 3
-MAX_WORKERS = 6
-WAIT_UNTIL_REPEAT_ACCESS = 2
-IMG_SIZE = 100
+from settings import *
 
 def thread_download(cutout_service, bands_to_download, fov, ra, dec, save_path, name):
     attempts = 0
@@ -28,23 +29,18 @@ def thread_download(cutout_service, bands_to_download, fov, ra, dec, save_path, 
             attempts += 1
     return results
 
-import requests
-from urllib.parse import quote
-import os
-import numpy as np
 
-SURVEYS = {
-    "PS1_color-i-r-g": "CDS/P/PanSTARRS/DR1/color-i-r-g",
-    "PS1_color-z-zg-g": "CDS/P/PanSTARRS/DR1/color-z-zg-g",
-    "PS1_g":    "CDS/P/PanSTARRS/DR1/g",
-    "PS1_i":    "CDS/P/PanSTARRS/DR1/i",
-    "PS1_r":    "CDS/P/PanSTARRS/DR1/r",
-    "PS1_y:":   "CDS/P/PanSTARRS/DR1/y",
-    "PS1_z":    "CDS/P/PanSTARRS/DR1/z",
-}
-BASE_URL = "http://alasky.u-strasbg.fr/hips-image-services/hips2fits?"
 
 class HiPS():
+    @classmethod
+    def bar(cls):
+        bands_to_show = []
+        for survey in SURVEYS.keys():
+            hips = st.sidebar.checkbox(survey)
+            if hips:
+                bands_to_show.append(survey)
+        return bands_to_show
+
     @classmethod
     def url(cls, hips, width, height, fov, ra, dec, format):
         return f"{BASE_URL}hips={quote(hips)}&width={width}&height={height}&format={format}&fov={fov}&projection=TAN&coordsys=icrs&ra={ra}&dec={dec}"
@@ -76,19 +72,18 @@ class HiPS():
         cls.save_image_fits(link,fov,ra,dec,save_path,band,name)
         cls.save_image_jpg(link,fov,ra,dec,save_path,band,name)
 
-def dir(save_path,name):
-    dir_name = f"{save_path}/{name}"
-    if not os.path.isdir(dir_name):
-        os.mkdir(dir_name)
+
         
-def download_image(ra,dec,name):
-    for format_ in [ "jpg", "fits" ]:
-        dir(save_path,format_)
-        for band in SURVEYS.keys():
-            dir(f"{save_path}/{format_}",band)
-            dir(f"{save_path}/{format_}/{band}",name)
+def download_image(ra,dec,name,save_path):
     first = HiPS()
-    thread_download(first, SURVEYS, 0.0028, ra, dec, save_path, name)
+    thread_download(first, SURVEYS, 0.028, ra, dec, save_path, name)
 
-
-save_path = dir(path,"image_download")
+def transform_path_to_test(save_path):
+    from shutil import copy
+    for format_ in os.listdir(save_path):
+        for band in os.listdir(f"{save_path}/{format_}"):
+            for name in os.listdir(f"{save_path}/{format_}/{band}"):
+                for coord in os.listdir(f"{save_path}/{format_}/{band}/{name}"):
+                    print(dir(dir(dir(dir(save_path,name),format_),band),name))
+                    copy(f"{save_path}/{format_}/{band}/{name}/{coord}",f"{save_path}/{name}/{format_}/{band}/{name}/{coord}")
+    print("Transform complite!")

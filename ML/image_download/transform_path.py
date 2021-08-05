@@ -19,6 +19,8 @@ def medium_transform(main_path,copy_path,name):
         for name_ in os.listdir(f"{main_path}/{_name}"):
             dir(f"{copy_path}/{_name}",name)
             copy(f"{main_path}/{_name}/{name_}",f"{copy_path}/{_name}/{name}/{name_}")
-for name in ["AGN", "GALAXY"]:
+#for name in ["AGN", "GALAXY"]:
     #basic_transform(f"/home/kiril/github/ML_data/{name}/image_download/jpg",f"/home/kiril/github/ML_data/{name}/image/jpg")
-    medium_transform(f"/home/kiril/github/ML_data/{name}/image/jpg","/home/kiril/github/ML_data/test",name)
+   # medium_transform(f"/home/kiril/github/ML_data/{name}/image/jpg","/home/kiril/github/ML_data/test",name)
+dir("/home/kiril/github/ML_data","test_2")
+medium_transform(f"/home/kiril/github/ML_data/AGN/image/jpg","/home/kiril/github/ML_data/test_2","AGN")

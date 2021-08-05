@@ -25,7 +25,7 @@ def ImageDeepDenseNN(input_shape):
     x = Conv2D(32, 3, strides=2, padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
-    '''
+    
     x = Conv2D(64, 3, padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
@@ -53,7 +53,7 @@ def ImageDeepDenseNN(input_shape):
     x = SeparableConv2D(1024, 3, padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
-    '''
+    
     x = GlobalAveragePooling2D()(x)
 
     x = Dropout(0.5)(x)
@@ -65,16 +65,17 @@ def DeepDenseNN(features):
     #print(input_img)
     #input_img = Dense(128, activation='relu', kernel_initializer='he_uniform', input_shape=(features,))
     layer_1 = Dense(64, activation='linear', kernel_initializer='he_uniform' )(input_img)
-    layer_2 = Dropout(.5, input_shape=(features,))(layer_1)
-    layer_3 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_2)
-    layer_4 = Dropout(.5, input_shape=(features,))(layer_3)
-    layer_5 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_4)
+    #layer_2 = Dropout(.5, input_shape=(features,))(layer_1)
+    layer_2 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_1)
+    #layer_4 = Dropout(.5, input_shape=(features,))(layer_3)
+    layer_3 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_2)
+    #layer_6 = Dropout(.5, input_shape=(features,))(layer_5)
+    layer_4 = Dense(8, activation='tanh', kernel_initializer='he_uniform' )(layer_3)
+    #layer_8 = Dropout(.5, input_shape=(features,))(layer_7)
+    layer_5 = Dense(4, activation='elu', kernel_initializer='he_uniform' )(layer_4)
+    #layer_10 = Dropout(.5, input_shape=(features,))(layer_9)
     layer_6 = Dropout(.5, input_shape=(features,))(layer_5)
-    layer_7 = Dense(8, activation='tanh', kernel_initializer='he_uniform' )(layer_6)
-    layer_8 = Dropout(.5, input_shape=(features,))(layer_7)
-    layer_9 = Dense(4, activation='elu', kernel_initializer='he_uniform' )(layer_8)
-    layer_10 = Dropout(.5, input_shape=(features,))(layer_9)
-    Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform')(layer_10)    
+    Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform')(layer_6)
     model = Model(input_img, Label)
     return model
 
@@ -147,10 +148,10 @@ def PreProcesing(image_size,batch_size,origin_path):
 			plt.title(int(labels[i]))
 			plt.axis("off")
 	'''
-	print(len(train_ds), len(val_ds))
+	#print(len(train_ds), len(val_ds))
 	train_ds = train_ds.prefetch(buffer_size=32)
 	val_ds = val_ds.prefetch(buffer_size=32)
-	print(train_ds)
+	#print(train_ds)
 	return train_ds, val_ds
 
 def ImageNN(image_size,batch_size,train_ds,val_ds,epochs,path_model,path_weights):
@@ -177,20 +178,52 @@ def TestNN(test_path,image_size,batch_size,path_model,path_weights):
 			one += 1
 	print(f"Accuracy of test sample:	{(one/count)*100}%")
 
+def Test_one():
+	from tensorflow import keras
+	name = "PS1_z"
+	path_model = f"/home/kiril/github/ML_with_AGN/ML/models/model_img_{name}"
+	path_weights = f"/home/kiril/github/ML_with_AGN/ML/models/weights_img_{name}"
+	
+	model = LoadModel(path_model,path_weights,optimizer="adam", loss="binary_crossentropy")
+	img = keras.preprocessing.image.load_img(
+		"/home/kiril/github/ML_data/GALAXY/image/jpg/PS1_z/164.127958333333_57.787918055555295.png"
+	)
+	print(img)
+	#img_array = keras.preprocessing.image.img_to_array(img)
+	img_array = tf.expand_dims(img, 0)  # Create batch axis
+
+	predictions = model.predict(img_array)
+	score = predictions[0]
+	print(
+		"This image is %.2f percent AGN and %.2f percent GAL."
+		% (100 * (1 - score), 100 * score)
+	)
+
 def Image_ML(origin_path, image_size, batch_size, epochs, test_path, path_model, path_weights):
 	train_ds, val_ds = PreProcesing(image_size,batch_size,origin_path)
 	ImageNN(image_size,batch_size,train_ds,val_ds,epochs,path_model,path_weights)
 	TestNN(test_path,image_size,batch_size,path_model,path_weights)
+def TEST_IMG():
+	image_size = (100, 100)
+	batch_size = 32
+	main_path = "/home/kiril/github/ML_data/test"
 
+	for name in os.listdir(main_path):
+		path_model = f"/home/kiril/github/ML_with_AGN/ML/models/model_img_{name}"
+		path_weights = f"/home/kiril/github/ML_with_AGN/ML/models/weights_img_{name}"
+		for name_ in [ "test_1", "test_2" ]:
+			test_path = f"/home/kiril/github/ML_data/{name_}/{name}"
+			TestNN(test_path,image_size,batch_size,path_model,path_weights)
+			
 def Start_IMG():
 	image_size = (100, 100)
 	batch_size = 32
-	epochs = 50
+	epochs = 5
 	main_path = "/home/kiril/github/ML_data/test"
 	
 	for name in os.listdir(main_path):
 		origin_path = f"{main_path}/{name}"
-		test_path = origin_path
+		test_path = f"/home/kiril/github/ML_data/test_1/{name}"
 		path_model = f"/home/kiril/github/ML_with_AGN/ML/models/model_img_{name}"
 		path_weights = f"/home/kiril/github/ML_with_AGN/ML/models/weights_img_{name}"
 		_name = os.listdir(origin_path)

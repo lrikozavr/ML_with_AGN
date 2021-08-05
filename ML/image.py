@@ -30,7 +30,10 @@ def save_fits(data,save_path):
     hdul = fits.HDUList([hdu])
     hdul.writeto(save_path)
 
-for name in os.listdir(path_fits_agn):
-    save_fits(built_sample(f"{path_fits_agn}/{name}"),f"{path_agn}/{name}_all.fits")
+#for name in os.listdir(path_fits_agn):
+#    save_fits(built_sample(f"{path_fits_agn}/{name}"),f"{path_agn}/{name}_all.fits")
 #train = pd.DataFrame(DATA)
 #NN()
+
+from ml import Test_one
+Test_one()

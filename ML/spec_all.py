@@ -1,6 +1,5 @@
 #!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
-'''
 import pandas as pd
 import numpy as np
 
@@ -10,14 +9,16 @@ from DataTrensform import DataP
 import os
 import time
 
-save_pic_path='/home/kiril/github/ML_with_AGN/ML/pic/P_nonerr'
+#save_pic_path='/home/kiril/github/ML_with_AGN/ML/pic/P_nonerr'
+save_pic_path="/home/kiril/github/ML_data/image_phot"
 
 output_path_mod = "/home/kiril/github/ML_with_AGN/ML/models/mod_"
 output_path_weight = "/home/kiril/github/ML_with_AGN/ML/models/weight_"
 
 output_path_predict = "/home/kiril/github/ML_with_AGN/ML/predict/P"
 
-input_path_data_agn = "/home/kiril/github/ML_with_AGN/ML/train_/sample_z_allwise_ps1_gaiadr3.csv"
+#input_path_data_agn = "/home/kiril/github/ML_with_AGN/ML/train_/sample_z_allwise_ps1_gaiadr3.csv"
+input_path_data_agn = "/media/kiril/j_08/AGN/excerpt/exerpt_folder/1628169042_allwise_ps1_gaiadr3.csv"
 input_path_data_star = "/home/kiril/github/ML_with_AGN/ML/train_/star_sh_allwise_ps1_gaiadr3.csv"
 input_path_data_qso = "/home/kiril/github/ML_with_AGN/ML/train_/qso_sh_allwise_ps1_gaiadr3.csv"
 input_path_data_gal = "/home/kiril/github/ML_with_AGN/ML/train_/gal_sh_allwise_ps1_gaiadr3.csv"
@@ -52,6 +53,12 @@ loss = 'binary_crossentropy'
 num_ep = 50
 batch_size = 1024
 
+def dir(save_path,name):
+    dir_name = f"{save_path}/{name}"
+    if not os.path.isdir(dir_name):
+        os.mkdir(dir_name)
+    return dir_name
+
 def test(data):
     label = data['label']
     #
@@ -73,82 +80,34 @@ def test(data):
     #
     data = data.drop(['z'], axis=1)
     #
+    data = data.drop(['Jmag','Hmag','Kmag','bp_rp'], axis=1)
+    #
     name_list = data['name'].unique()
     local_output_path_mod = output_path_mod
     local_output_path_weight = output_path_weight
     local_output_path_predict = output_path_predict
-    local_save_pic_path = save_pic_path
+    local_save_pic_path = save_pic_path + "/P"
+    nname="P"
     for name_ in name_list:
         local_output_path_mod = local_output_path_mod + "_" + name_
         local_output_path_weight = local_output_path_weight + "_" + name_
         local_output_path_predict = local_output_path_predict + "_" + name_
+        
         local_save_pic_path = local_save_pic_path + "_" + name_
-
+        nname += "_" + name_
+    print(dir(save_pic_path,nname))    
     local_output_path_predict += ".csv"
     
     #os.mkdir(local_save_pic_path)
     #Many_Graf_pd(data,local_save_pic_path)
-    Many_Graf_pd_diff(data,local_save_pic_path)
+    Many_Graf_pd(data,local_save_pic_path)
     
     data = data.drop(['name'],axis=1)
-    train=DataP(data,0) 
+    train = DataP(data,0)
     print("Data train shape:	",train.shape)
     NN(train,np.array(label),0.25,0.25,batch_size,num_ep,optimizer,loss,local_output_path_predict,local_output_path_mod,local_output_path_weight)
-    #''
-    time.sleep(100000)
-
-	agn_sample=DataP(agn_sample,0) 									############################flag_color
-	
-	model1 = LoadModel(output_path_mod,output_path_weight,optimizer,loss)
-	Class = model1.predict(train, batch_size)
-
-	Class = np.array(Class)
-
-	g=open(output_path_predict+"/"+name,'w')
-	Class.tofile(g,"\n")
-	g.close()
-
-	j=0
-	for i in range(np.size(Class)):
-		#if(Class[i]<0.5):
-			#Class[i] = 0
-		if(Class[i]>=0.5):
-			#Class[i] = 1
-			j+=1
-	print(name+":	",j /np.size(Class) *100,"%")
-    #''
-
+    exit()
 #test(data_agn_star)
 #test(data_agn_qso)
 #test(data_agn_gal)
-#test(data_agn_star_qso)
-
-#test(data_agn_star_gal)
-#test(data_agn_qso_gal)
-
-
-
-
-
-#test(data_agn_star_qso_gal)
-import sys
-sys.path.insert(1, 'image_download')
-from image_download import download_image
-def data_download(data):
-    #print(data)
-    n = data.shape[0]
-    for i in range(n):
-        #print(float(data['RA'][i]))
-        download_image(float(data['RA'][i]),float(data['DEC'][i]))
-#data_download(data_gal)
-
-#download_image(200,50)
-
-'''
-#import sys
-#sys.path.insert(1, 'image_download')
-#from image_download import convert_image
-#convert_image("/home/kiril/github/ML_data/test/AGN")
-#convert_image("/home/kiril/github/ML_data/test/GALAXY")
-from ml import Start_IMG
-Start_IMG()
+test(data_agn_star_qso_gal)
