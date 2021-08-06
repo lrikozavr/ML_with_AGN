@@ -18,10 +18,10 @@ output_path_weight = "/home/kiril/github/ML_with_AGN/ML/models/weight_"
 output_path_predict = "/home/kiril/github/ML_with_AGN/ML/predict/P"
 
 #input_path_data_agn = "/home/kiril/github/ML_with_AGN/ML/train_/sample_z_allwise_ps1_gaiadr3.csv"
-input_path_data_agn = "/media/kiril/j_08/AGN/excerpt/exerpt_folder/1628169042_allwise_ps1_gaiadr3.csv"
-input_path_data_star = "/home/kiril/github/ML_with_AGN/ML/train_/star_sh_allwise_ps1_gaiadr3.csv"
-input_path_data_qso = "/home/kiril/github/ML_with_AGN/ML/train_/qso_sh_allwise_ps1_gaiadr3.csv"
-input_path_data_gal = "/home/kiril/github/ML_with_AGN/ML/train_/gal_sh_allwise_ps1_gaiadr3.csv"
+input_path_data_agn = "/media/kiril/j_08/AGN/excerpt/exerpt_folder/agn_end.csv"
+input_path_data_star = "/home/kiril/github/ML_with_AGN/ML/train_/star_end.csv"
+input_path_data_qso = "/home/kiril/github/ML_with_AGN/ML/train_/qso_end.csv"
+input_path_data_gal = "/home/kiril/github/ML_with_AGN/ML/train_/gal_end.csv"
 
 data_agn = pd.read_csv(input_path_data_agn, header=0, sep=',',dtype=np.float)
 data_star = pd.read_csv(input_path_data_star, header=0, sep=',',dtype=np.float)
@@ -100,14 +100,15 @@ def test(data):
     
     #os.mkdir(local_save_pic_path)
     #Many_Graf_pd(data,local_save_pic_path)
-    Many_Graf_pd(data,local_save_pic_path)
+    #Many_Graf_pd(data,local_save_pic_path)
     
     data = data.drop(['name'],axis=1)
     train = DataP(data,0)
+    print(train)
     print("Data train shape:	",train.shape)
     NN(train,np.array(label),0.25,0.25,batch_size,num_ep,optimizer,loss,local_output_path_predict,local_output_path_mod,local_output_path_weight)
     exit()
-#test(data_agn_star)
+test(data_agn_star)
 #test(data_agn_qso)
 #test(data_agn_gal)
 test(data_agn_star_qso_gal)

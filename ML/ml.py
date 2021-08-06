@@ -74,8 +74,8 @@ def DeepDenseNN(features):
     #layer_8 = Dropout(.5, input_shape=(features,))(layer_7)
     layer_5 = Dense(4, activation='elu', kernel_initializer='he_uniform' )(layer_4)
     #layer_10 = Dropout(.5, input_shape=(features,))(layer_9)
-    layer_6 = Dropout(.5, input_shape=(features,))(layer_5)
-    Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform')(layer_6)
+    #layer_6 = Dropout(.1, input_shape=(features,))(layer_5)
+    Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform')(layer_5)
     model = Model(input_img, Label)
     return model
 

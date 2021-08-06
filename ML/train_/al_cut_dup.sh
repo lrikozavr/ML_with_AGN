@@ -14,28 +14,13 @@ sort_h() {
 cat $1 | head -n 1
 cat $1 | tail -n +2 | LC_ALL=en_US.utf8   sort -t, -k$2 -g 
 }
-dub1() {
-./dub_f_s.py -fl f -fi $1 > $2
-./dub_f_s.py -col $col1 $col2 -fl fa -fi $2 > $3
+dub() {
+./dub_f_s.py -fl $2 -fi $1 > temp.csv
+./dub_f_s.py -col $col1 $col2 -fl fa -fi temp.csv
+rm temp.csv
 }
-dub2() {
-./dub_f_s.py -fl fa -fi $1 > $2
-./dub_f_s.py -col $col1 $col2 -fl fa -fi $2 > $3
-}
-dub1 $1 file1.csv file2.csv
-sort_h file2.csv 2 > file_sort.csv
-dub2 file_sort.csv file1_sort.csv file2_sort.csv
-sort_h file2_sort.csv $col2 > file_sort_2.csv
-dub2 file_sort_2.csv file1_sort_2.csv file2_sort_2.csv
-rm file1.csv
-rm file2.csv
-rm file_sort.csv
-rm file1_sort.csv
-rm file2_sort.csv
-rm file_sort_2.csv
-rm file1_sort_2.csv
-
-count=$(cat file2_sort_2.csv | head -n 1 | sed 's!,!\t!g' | wc -w )
+cut_coord() {
+count=$(cat $1 | head -n 1 | sed 's!,!\t!g' | wc -w )
 
 awk -F, '{
     for(i=1; i<='$count'; i+=1) 
@@ -47,7 +32,25 @@ awk -F, '{
             else{printf("%s\n",$i)}
         }
     }
-}' file2_sort_2.csv > file2_sort_2_cut.csv
+}' $1
+}
+creteria_1() {
+dub $1 "f" > file1.csv
+sort_h file1.csv 2 > file1_sort.csv
+dub file1_sort.csv "fa" > file2_sort.csv
+sort_h file2_sort.csv $col2 > file2_sort_2.csv
+dub file2_sort_2.csv "fa" > file3_sort_2.csv
+rm file1.csv
+rm file1_sort.csv
+rm file2_sort.csv
 rm file2_sort_2.csv
-sort_h file2_sort_2_cut.csv 2
-rm file2_sort_2_cut.csv
+sort_h file3_sort_2.csv 2
+rm file3_sort_2.csv
+}
+creteria_2() {
+    dub $1 "fa"
+}
+
+creteria_2 $1 > temp.csv
+cut_coord temp.csv
+rm temp.csv
