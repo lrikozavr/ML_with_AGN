@@ -18,10 +18,10 @@ output_path_weight = "/home/kiril/github/ML_with_AGN/ML/models/weight_"
 output_path_predict = "/home/kiril/github/ML_with_AGN/ML/predict/P"
 
 #input_path_data_agn = "/home/kiril/github/ML_with_AGN/ML/train_/sample_z_allwise_ps1_gaiadr3.csv"
-input_path_data_agn = "/media/kiril/j_08/AGN/excerpt/exerpt_folder/agn_end.csv"
-input_path_data_star = "/home/kiril/github/ML_with_AGN/ML/train_/star_end.csv"
-input_path_data_qso = "/home/kiril/github/ML_with_AGN/ML/train_/qso_end.csv"
-input_path_data_gal = "/home/kiril/github/ML_with_AGN/ML/train_/gal_end.csv"
+input_path_data_agn = "/home/kiril/github/ML_data/data/agn_end.csv"
+input_path_data_star = "/home/kiril/github/ML_data/data/star_end.csv"
+input_path_data_qso = "//home/kiril/github/ML_data/data/qso_end.csv"
+input_path_data_gal = "/home/kiril/github/ML_data/data/gal_end.csv"
 
 data_agn = pd.read_csv(input_path_data_agn, header=0, sep=',',dtype=np.float)
 data_star = pd.read_csv(input_path_data_star, header=0, sep=',',dtype=np.float)
@@ -62,7 +62,7 @@ def dir(save_path,name):
 def test(data):
     label = data['label']
     #
-    agn_sample,other_sample=data[label == 1],data[label == 0]
+    
     #
     c=0
     for i in range(label.size):
@@ -76,12 +76,14 @@ def test(data):
     data = data.drop(['e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag',
                     'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
                     'parallax','parallax_error','pm','pmra','pmra_error','pmdec','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error'], axis=1)
-    data = data.drop(['label','RA','DEC'],axis=1)
+    
     #
     data = data.drop(['z'], axis=1)
     #
-    data = data.drop(['Jmag','Hmag','Kmag','bp_rp'], axis=1)
+    data = data.drop(['W3mag','W4mag','Jmag','Hmag','Kmag','bp_rp'], axis=1)
     #
+    agn_sample,other_sample=data[label == 1],data[label == 0]
+    data = data.drop(['label','RA','DEC'],axis=1)
     name_list = data['name'].unique()
     local_output_path_mod = output_path_mod
     local_output_path_weight = output_path_weight
@@ -107,8 +109,28 @@ def test(data):
     print(train)
     print("Data train shape:	",train.shape)
     NN(train,np.array(label),0.25,0.25,batch_size,num_ep,optimizer,loss,local_output_path_predict,local_output_path_mod,local_output_path_weight)
-    exit()
+    
+    agn_sample=DataP(agn_sample.drop(['name','label','RA','DEC'],axis=1),0) 									############################flag_color
+
+    model1 = LoadModel(local_output_path_mod,local_output_path_weight,optimizer,loss)
+    Class = model1.predict(agn_sample, batch_size)
+    
+    Class = np.array(Class)
+
+    #g=open(output_path_predict+"/"+name,'w') 
+    #Class.tofile(g,"\n")
+    #g.close()
+
+    j=0
+    for i in range(np.size(Class)):
+        #if(Class[i]<0.5):
+            #Class[i] = 0
+        if(Class[i]>=0.5):
+            #Class[i] = 1
+            j+=1
+    print("AGN:	",j /np.size(Class) *100,"%")
+    
 test(data_agn_star)
-#test(data_agn_qso)
-#test(data_agn_gal)
+test(data_agn_qso)
+test(data_agn_gal)
 test(data_agn_star_qso_gal)
