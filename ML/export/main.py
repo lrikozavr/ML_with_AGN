@@ -1,4 +1,3 @@
-#!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
 from settings import dir, SURVEYS
 from download import download_image,transform_path_to_test

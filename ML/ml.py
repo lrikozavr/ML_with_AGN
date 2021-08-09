@@ -64,18 +64,31 @@ def DeepDenseNN(features):
     input_img = Input(shape=(features,))
     #print(input_img)
     #input_img = Dense(128, activation='relu', kernel_initializer='he_uniform', input_shape=(features,))
+    #layer_1 = Dense(64, activation='relu', kernel_initializer='he_uniform' )(input_img)
     layer_1 = Dense(64, activation='linear', kernel_initializer='he_uniform' )(input_img)
-    #layer_2 = Dropout(.5, input_shape=(features,))(layer_1)
+    #layer_2 = Dense(32, activation='relu', kernel_initializer='he_uniform' )(layer_1)
     layer_2 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_1)
-    #layer_4 = Dropout(.5, input_shape=(features,))(layer_3)
     layer_3 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_2)
-    #layer_6 = Dropout(.5, input_shape=(features,))(layer_5)
+    #layer_4 = Dense(8, activation='relu', kernel_initializer='he_uniform' )(layer_3)
     layer_4 = Dense(8, activation='tanh', kernel_initializer='he_uniform' )(layer_3)
-    #layer_8 = Dropout(.5, input_shape=(features,))(layer_7)
+    #layer_5 = Dense(4, activation='relu', kernel_initializer='he_uniform' )(layer_4)
     layer_5 = Dense(4, activation='elu', kernel_initializer='he_uniform' )(layer_4)
     #layer_10 = Dropout(.5, input_shape=(features,))(layer_9)
     #layer_6 = Dropout(.1, input_shape=(features,))(layer_5)
-    Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform')(layer_5)
+    Label = Dense(1,activation="sigmoid", kernel_initializer='he_uniform' )(layer_5)
+    model = Model(input_img, Label)
+    return model
+def DeepDarkDenseNN(features):
+    input_img = Input(shape=(features,))
+    layer_1 = Dense(8, activation='linear', kernel_initializer='he_uniform' )(input_img)
+    layer_2 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_1)
+    layer_3 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_2)
+    layer_4 = Dense(64, activation='relu', kernel_initializer='he_uniform' )(layer_3)
+    layer_5 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_4)
+    layer_6 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_5)
+    layer_7 = Dense(8, activation='tanh', kernel_initializer='he_uniform' )(layer_6)
+    layer_8 = Dense(4, activation='elu', kernel_initializer='he_uniform' )(layer_7)
+    Label = Dense(1,activation="sigmoid", kernel_initializer='he_uniform' )(layer_8)
     model = Model(input_img, Label)
     return model
 
@@ -235,28 +248,37 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	X_train, X_test, y_train, y_test = train_test_split(train, label, 
 														test_size = test_size, random_state = 56) #0.4
 	#print(X_train, X_test, y_train, y_test)
+	
+	#from keras.utils import np_utils
+	#from keras import metrics,losses
+	#Y_train = np_utils.to_categorical(y_train, 3)
+	#Y_test = np_utils.to_categorical(y_test, 3)
+	#print(Y_train, Y_test)
 	#batch_size = 1024
 	#num_ep = 15
 	features = train.shape[1]
 	print(features)
-	model = DeepDenseNN(features)
+	#model = DeepDenseNN(features)
+	model = DeepDarkDenseNN(features)
 
 	model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
 
 	model.fit(X_train, y_train,
 			epochs=num_ep,
+			verbose=1,
 			batch_size=batch_size,
 			validation_split=validation_split) #0.25
-
+	model.evaluate(X_test, y_test, verbose=1)
 	model.summary()
-	Class = model.predict(X_test, batch_size)
 	
+	Class = model.predict(X_test, batch_size)
+	print(Class)
 	Class = np.array(Class)
 	
 	g=open(output_path_predict,'w')
 	Class.tofile(g,"\n")
 	g.close()
-	
+
 	count = 0
 	Tq, Fq, Ts, Fs = 0,0,0,0
 	for i in range(y_test.shape[0]):
@@ -284,4 +306,5 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	print("nonAGN completness:",     Ts/(Ts+Fq))
 	print("AGN_F:",     2*(Tq/(Tq+Fq)*Tq/(Tq+Fs))/(Tq/(Tq+Fq)+Tq/(Tq+Fs)) )
 	print("non_AGN_F:",     2*(Ts/(Ts+Fs)*Ts/(Ts+Fq))/(Ts/(Ts+Fq)+Ts/(Ts+Fs)) )
+
 	SaveModel(model,output_path_mod,output_path_weight)
