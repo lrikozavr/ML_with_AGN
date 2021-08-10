@@ -12,8 +12,8 @@ import time
 #save_pic_path='/home/kiril/github/ML_with_AGN/ML/pic/P_nonerr'
 save_pic_path="/home/kiril/github/ML_data/image_phot"
 
-output_path_mod = "/home/kiril/github/ML_with_AGN/ML/models/mod_relu_"
-output_path_weight = "/home/kiril/github/ML_with_AGN/ML/models/weight_relu_"
+output_path_mod = "/home/kiril/github/ML_with_AGN/ML/models/mod_dark"
+output_path_weight = "/home/kiril/github/ML_with_AGN/ML/models/weight_dark"
 
 output_path_predict = "/home/kiril/github/ML_with_AGN/ML/predict/P"
 
@@ -51,7 +51,7 @@ data_agn_star_qso_gal = data_agn_star_qso.append(data_gal, ignore_index=True)
 optimizer = 'adam'
 #loss = 'categorical_crossentropy'
 loss = 'binary_crossentropy'
-num_ep = 50
+num_ep = 10
 batch_size = 1024
 
 def dir(save_path,name):
@@ -59,6 +59,12 @@ def dir(save_path,name):
     if not os.path.isdir(dir_name):
         os.mkdir(dir_name)
     return dir_name
+
+
+
+
+
+
 
 def test(data):
     data = data.sort_values(by=['DEC'], ascending=True, ignore_index=True)
@@ -80,11 +86,11 @@ def test(data):
     #data = data.drop(['e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag',
     #                'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
     #                'parallax','parallax_error','pm','pmra','pmra_error','pmdec','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error'], axis=1)
-    data = data.drop(['z','e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag','Jmag','Hmag','Kmag',
-                    'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
-                    'parallax_error','pm','pmra_error','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error','bp_rp','phot_g_mean_mag'], axis=1)
-    data = data.drop(['parallax','pmra','pmdec','W4mag','W3mag'], axis=1)
-#'gmag','rmag','imag','zmag','ymag','phot_bp_mean_mag','phot_rp_mean_mag'
+    data = data.drop(['z','e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag','Jmag','Hmag','Kmag','W1mag','W2mag','W3mag','W4mag',
+                    'e_gmag','e_rmag','e_imag','e_zmag','e_ymag','gmag','rmag','imag','zmag','ymag',
+                    'parallax_error','pm','pmra_error','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error','bp_rp'], axis=1)
+    data = data.drop(['parallax','pmra','pmdec'], axis=1)
+#'W1mag','W2mag','W3mag','W4mag','gmag','rmag','imag','zmag','ymag','phot_bp_mean_mag','phot_rp_mean_mag','phot_g_mean_mag'
     #
     #data = data.drop(['z'], axis=1)
     #
@@ -117,6 +123,7 @@ def test(data):
     
     #cols = ['phot_g_mean_mag','phot_bp_mean_mag','phot_rp_mean_mag','gmag','rmag','imag','zmag','ymag','W1mag','W2mag']
     #data = data[cols]
+    '''
     import seaborn as sns
     import matplotlib.pyplot as plt
     corr = data.corr()
@@ -124,6 +131,7 @@ def test(data):
                 xticklabels=corr.columns.values,
                 yticklabels=corr.columns.values)
     plt.savefig('2.jpg')
+    '''
     #exit()
     print(data.columns.values)
     train = DataP(data,0)
@@ -165,7 +173,7 @@ def test(data):
     print("QSO:	",qso /np.size(Class) *100,"%")
     print("STAR:	",star /np.size(Class) *100,"%")
     
-#test(data_agn_star)
+test(data_agn_star)
 #test(data_agn_qso)
 #test(data_agn_gal)
-test(data_agn_star_qso_gal)
+#test(data_agn_star_qso_gal)

@@ -268,7 +268,7 @@ built_sample() {
 	then
 		sample="$sample.$(date +%s)"
 	fi
-	cp $filecat/$(recurs_cross $filecat $filesort $r) $path/$sample.1.csv
+	mv $filecat/$(recurs_cross $filecat $filesort $r) $path/$sample.1.csv
 	cd $path
 	./dub_f_s.py -fl fa -fi $sample.1.csv > $sample.2.csv
 

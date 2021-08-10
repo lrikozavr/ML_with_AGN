@@ -8,7 +8,7 @@ from keras.layers import experimental, Conv2D, SeparableConv2D, MaxPooling2D, Gl
 from keras.models import Model
 from keras.layers.normalization import BatchNormalization
 
-
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from keras import backend as K
@@ -91,6 +91,14 @@ def DeepDarkDenseNN(features):
     Label = Dense(1,activation="sigmoid", kernel_initializer='he_uniform' )(layer_8)
     model = Model(input_img, Label)
     return model
+
+def NoDeepDenseNN(features):
+    input_img = Input(shape=(features,))
+    Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform' )(input_img)
+    #layer_2 = Dense(features/2, activation='tanh', kernel_initializer='he_uniform' )(input_img)
+    #Label = Dense(1, activation="sigmoid", kernel_initializer='he_uniform' )(layer_1)
+    return Model(input_img, Label)
+    
 
 def SaveModel(model, path_model, path_weights):
     model_json = model.to_json()
@@ -242,7 +250,8 @@ def Start_IMG():
 		_name = os.listdir(origin_path)
 		PreDelete(origin_path,_name[0],_name[1])
 		Image_ML(origin_path, image_size, batch_size, epochs, test_path, path_model, path_weights)
-	
+
+
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
 	X_train, X_test, y_train, y_test = train_test_split(train, label, 
@@ -259,18 +268,39 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	features = train.shape[1]
 	print(features)
 	#model = DeepDenseNN(features)
-	model = DeepDarkDenseNN(features)
-
+	#model = DeepDarkDenseNN(features)
+	model = NoDeepDenseNN(features)
+	
 	model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
-
+	####
+	weights_history = []
+	import keras
+# A custom callback
+# https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/Callback
+	class MyCallback(keras.callbacks.Callback):
+		def on_batch_end(self, batch, logs):
+			weights, _biases = model.get_weights()
+			w1, w2, w3 = weights
+			weights = [w1[0], w2[0], w3[0]]
+			#w1, w2, w3, w4, w5, w6, w7 = weights
+			#weights = [w1[0], w2[0], w3[0], w4[0], w5[0], w6[0], w7]
+			#print('on_batch_end() model.weights:', weights)
+			weights_history.append(weights)
+	callback = MyCallback()
+	####
 	model.fit(X_train, y_train,
 			epochs=num_ep,
 			verbose=1,
 			batch_size=batch_size,
-			validation_split=validation_split) #0.25
+			validation_split=validation_split,
+			callbacks=[callback]) #0.25
 	model.evaluate(X_test, y_test, verbose=1)
 	model.summary()
 	
+	plt.figure(1, figsize=(6, 3))
+	plt.plot(weights_history)
+	plt.savefig('1231231.jpg')
+
 	Class = model.predict(X_test, batch_size)
 	print(Class)
 	Class = np.array(Class)
