@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 from ml import NN,LoadModel
-from graf import Many_Graf_pd,Many_Graf_pd_diff
+from graf import Many_Graf_pd,Many_Graf_pd_diff,test_ML
 from DataTrensform import DataP
 import os
 import time
@@ -20,7 +20,7 @@ output_path_predict = "/home/kiril/github/ML_with_AGN/ML/predict/P"
 #input_path_data_agn = "/home/kiril/github/ML_with_AGN/ML/train_/sample_z_allwise_ps1_gaiadr3.csv"
 input_path_data_agn = "/home/kiril/github/ML_data/data/agn_end.csv"
 input_path_data_star = "/home/kiril/github/ML_data/data/star_end.csv"
-input_path_data_qso = "//home/kiril/github/ML_data/data/qso_end.csv"
+input_path_data_qso = "/home/kiril/github/ML_data/data/qso_end.csv"
 input_path_data_gal = "/home/kiril/github/ML_data/data/gal_end.csv"
 
 data_agn = pd.read_csv(input_path_data_agn, header=0, sep=',',dtype=np.float)
@@ -51,7 +51,7 @@ data_agn_star_qso_gal = data_agn_star_qso.append(data_gal, ignore_index=True)
 optimizer = 'adam'
 #loss = 'categorical_crossentropy'
 loss = 'binary_crossentropy'
-num_ep = 10
+num_ep = 50
 batch_size = 1024
 
 def dir(save_path,name):
@@ -86,7 +86,7 @@ def test(data):
     #data = data.drop(['e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag',
     #                'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
     #                'parallax','parallax_error','pm','pmra','pmra_error','pmdec','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error'], axis=1)
-    data = data.drop(['z','e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag','Jmag','Hmag','Kmag','W1mag','W2mag','W3mag','W4mag',
+    data = data.drop(['z','e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag','Jmag','Hmag','Kmag',
                     'e_gmag','e_rmag','e_imag','e_zmag','e_ymag','gmag','rmag','imag','zmag','ymag',
                     'parallax_error','pm','pmra_error','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error','bp_rp'], axis=1)
     data = data.drop(['parallax','pmra','pmdec'], axis=1)
@@ -144,6 +144,8 @@ def test(data):
     #agn_sample=DataP(agn_sample,0) 									############################flag_color
     model1 = LoadModel(local_output_path_mod,local_output_path_weight,optimizer,loss)
     #Class = model1.predict(agn_sample, batch_size)
+    #test_ML(data['phot_g_mean_mag'],data['phot_bp_mean_mag'],data['phot_rp_mean_mag'],model1)
+    #
     Class = model1.predict(train, batch_size)
     
     Class = np.array(Class)
@@ -173,7 +175,8 @@ def test(data):
     print("QSO:	",qso /np.size(Class) *100,"%")
     print("STAR:	",star /np.size(Class) *100,"%")
     
-test(data_agn_star)
+#test(data_agn_star)
 #test(data_agn_qso)
 #test(data_agn_gal)
+test(data_agn_star_qso)
 #test(data_agn_star_qso_gal)

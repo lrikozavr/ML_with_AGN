@@ -520,15 +520,67 @@ agn() {
 	built_sample $filecat_agn $r $filesort
 	awk -F, '{if($4 != "" && $5 != "" && $18 != "" && $20 != "" && $22 != "" && $24 != "" && $26 != "" && $35 != "" && $37 != "" && $39 != ""){print $0}}' $(train_pipe agn.csv) > agn_end.csv
 }
+
+test_() {
+	cat qso_end.csv > all_cat.csv
+	cat gal_end.csv | tail -n +2 >> all_cat.csv
+	cat star_end.csv | tail -n +2 >> all_cat.csv
+	st agn_end.csv all_cat.csv test_temp.csv 1not2 5
+	cat test_temp.csv > agn_end.csv
+	rm test_temp.csv
+	rm all_cat.csv
+}
+
+cross_dup() {
+	echo "$1, $2"
+	cat1=$1
+	cat2=$2
+	st $cat1 $cat2 temp1.csv 1not2 5
+	st $cat1 $cat2 temp2.csv 2not1 5
+	cat temp1.csv > $cat1
+	cat temp2.csv > $cat2
+	rm temp1.csv
+	rm temp2.csv
+}
+
+cou() {
+	wc -l agn_end.csv
+	wc -l gal_end.csv
+	wc -l qso_end.csv
+	wc -l star_end.csv
+}
+
+del_dup() {
+	cou
+	for name_ in agn_end gal_end
+	do
+		for _name in  gal_end qso_end star_end
+		do
+			if [[ "$name_" != "$_name" ]]
+			then
+				cross_dup $name_.csv $_name.csv
+			fi
+		done
+	done
+
+	cross_dup qso_end.csv star_end.csv
+	cou
+}
+
 train_pipe_main() {
 	echo "agn_end.csv"
-	shuf_count=$(cat agn_end.csv | tail -n +2 | wc -l )
-	
+	#shuf_count=$(cat agn_end.csv | tail -n +2 | wc -l )
+	shuf_count=100000
 	#awk -F, 'BEGIN{print "RA,DEC,z" > "star.1.csv"; print "RA,DEC,z" > "qso.1.csv"; print "RA,DEC,z" > "gal.1.csv"}{if($4==0) {print $1 "," $2 "," $3 > "star.1.csv"} if($4==1) {print $1 "," $2 "," $3 > "qso.1.csv"} if($4==2) {print $1 "," $2 "," $3 > "gal.1.csv"}}' /media/kiril/j_08/AGN/excerpt/exerpt_folder/cat_all/cat11.sort
 	#awk -F, 'BEGIN{print "RA,DEC,z" > "star.2.csv"; print "RA,DEC,z" > "qso.2.csv"; print "RA,DEC,z" > "gal.2.csv"}{if($3=="STAR") {print $1 "," $2 "," $5  > "star.2.csv"} if($3=="QSO" && $4!="AGN") {print $1 "," $2 "," $5  > "qso.2.csv"} if($3=="GALAXY" && $4!="AGN") {print $1 "," $2 "," $5 > "gal.2.csv"}}' /media/kiril/j_08/AGN/excerpt/exerpt_folder/cat_all/sdss_dr16.csv
 	filesort="/media/kiril/j_08/AGN/excerpt/exerpt_folder/tmp"	
 	star_qso_gal "qso"
-	star_qso_gal "gal"
-	star_qso_gal "star"	
+	#star_qso_gal "gal"
+	#star_qso_gal "star"	
 }
-train_pipe_main
+
+#train_pipe_main
+
+#test_
+
+del_dup

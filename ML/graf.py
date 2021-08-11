@@ -293,3 +293,48 @@ for i1 in range(7,12,1):
         if(not i1==i2 ):
             Hist2(col[i1],col[i2])            
 '''            
+def test_ML(a,b,c,model):
+    n=100
+
+    max = [a.max(), b.max(), c.max()]
+    min = [a.min(), b.min(), c.min()]
+
+    x = max[0]-min[0]
+    y = max[1]-min[1]
+    z = max[2]-min[2]
+
+    dx = x/float(n)
+    dy = y/float(n)
+    dz = z/float(n)
+    print(dx,dy,dz)
+    data = []
+    for ix in range(n):
+        for iy in range(n):
+            for iz in range(n):
+                mass = [min[0]+dx*ix, min[1]+dy*iy, min[2]+dz*iz]
+                data.append(mass)
+        
+    output_data = model.predict(np.array(data), 1024)
+
+    data_1_0, data_1_1, data_1_2 = [], [], []    
+    data_0_0, data_0_1, data_0_2 = [], [], []
+    for i in range(n**3):
+        if(output_data[i] > 0.5):
+            data_1_0.append(data[i][0])
+            data_1_1.append(data[i][1])
+            data_1_2.append(data[i][2])
+        else:
+            data_0_0.append(data[i][0])
+            data_0_1.append(data[i][1])
+            data_0_2.append(data[i][2])            
+
+    fig=plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.set_xlabel('g',fontsize=40)
+    ax.set_ylabel('bp',fontsize=40)
+    fig.set_size_inches(20,20)
+    ax.scatter3D(data_0_1,data_0_2,data_0_0,s=20,c='black',label="0")
+    ax.scatter(data_1_1,data_1_2,data_1_0,s=20,c='red',label="1")
+    ax.legend(loc=1,prop={'size': 20})
+    fig.savefig('save_path.jpg')
+    plt.close(fig)

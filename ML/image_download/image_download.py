@@ -87,7 +87,7 @@ class HiPS():
         url_fits = cls.url(link,IMG_SIZE,IMG_SIZE,fov,ra,dec,"fits")
         with fits.open(url_fits, cache=False) as hdul:
             hdul.verify("fix")
-            file = f"{save_path}/fits/{ra}_{dec}/{band}.fits"
+            file = f"{save_path}/fits/{band}/{ra}_{dec}.fits"
             if os.path.isfile(file):
                 os.remove(file)
             hdul.writeto(file)
@@ -97,23 +97,24 @@ class HiPS():
         url_jpg = cls.url(link,IMG_SIZE,IMG_SIZE,fov,ra,dec,"jpg")
         response = requests.get(url_jpg)
         if response.status_code == 200:
-            with open(f"{save_path}/jpg/{ra}_{dec}/{band}.jpg",'wb') as file:
+            with open(f"{save_path}/jpg/{band}/{ra}_{dec}.jpg",'wb') as file:
                 file.write(response.content)
         else:
             print(f"Error code: {response.status_code}")
 
     @classmethod
     def save_fits_jpg(cls,link,fov,ra,dec,save_path,band):
-        cls.save_image_fits(link,fov,ra,dec,save_path,band)
+        #cls.save_image_fits(link,fov,ra,dec,save_path,band)
         cls.save_image_jpg(link,fov,ra,dec,save_path,band)
 
     @classmethod
     def get_bands_to_download(cls, bands_to_show):
         return {band: url for band, url in SURVEYS.items() if band in bands_to_show}
 
-save_path = "/home/kiril/github/ML_data/GALAXY/image_download"
-save_path_jpg = "/home/kiril/github/ML_with_AGN/ML/image_download/jpeg"
-save_path_fits = "/home/kiril/github/ML_with_AGN/ML/image_download/fits"
+#save_path = "/home/kiril/github/ML_data/GALAXY/image_download"
+save_path = "/home/kiril/github/ML_data/QSO"
+#save_path_jpg = "/home/kiril/github/ML_with_AGN/ML/image_download/jpeg"
+#save_path_fits = "/home/kiril/github/ML_with_AGN/ML/image_download/fits"
 
 def dir(save_path,name):
     dir_name = f"{save_path}/{name}"
@@ -121,11 +122,6 @@ def dir(save_path,name):
         os.mkdir(dir_name)
         
 def download_image(ra,dec):
-    dir_name = f"{ra}_{dec}"
-    dir(save_path,"jpg")
-    dir(save_path,"fits")
-    dir(f"{save_path}/jpg",dir_name)
-    dir(f"{save_path}/fits",dir_name)
     first = HiPS()
     thread_download(first, SURVEYS, 0.0028, ra, dec, save_path)
 
@@ -144,3 +140,15 @@ def convert_image(path):
         rgb_im = im.convert('RGB')
         rgb_im.save(f"{path}/{line}.jpg")
         os.remove(f"{path}/{name}")
+
+import pandas as pd
+import numpy as np
+input_path_data_qso = "/home/kiril/github/ML_data/data/qso_end.csv"
+data_qso = pd.read_csv(input_path_data_qso, header=0, sep=',',dtype=np.float)
+dir(save_path,"jpg")
+dir(save_path,"fits")
+for name in SURVEYS.keys():
+    dir(f"{save_path}/jpg",name)
+    dir(f"{save_path}/fits",name)
+for i in range(len(data_qso)):
+    download_image(data_qso['RA'][i],data_qso['DEC'][i])

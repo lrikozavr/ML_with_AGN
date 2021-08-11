@@ -267,12 +267,13 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	#num_ep = 15
 	features = train.shape[1]
 	print(features)
-	#model = DeepDenseNN(features)
+	model = DeepDenseNN(features)
 	#model = DeepDarkDenseNN(features)
-	model = NoDeepDenseNN(features)
+	#model = NoDeepDenseNN(features)
 	
 	model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
 	####
+	'''
 	weights_history = []
 	import keras
 # A custom callback
@@ -287,20 +288,21 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 			#print('on_batch_end() model.weights:', weights)
 			weights_history.append(weights)
 	callback = MyCallback()
+	'''
 	####
 	model.fit(X_train, y_train,
 			epochs=num_ep,
 			verbose=1,
 			batch_size=batch_size,
-			validation_split=validation_split,
-			callbacks=[callback]) #0.25
+			validation_split=validation_split)
+			#callbacks=[callback]) #0.25
 	model.evaluate(X_test, y_test, verbose=1)
 	model.summary()
-	
+	'''
 	plt.figure(1, figsize=(6, 3))
 	plt.plot(weights_history)
 	plt.savefig('1231231.jpg')
-
+	'''
 	Class = model.predict(X_test, batch_size)
 	print(Class)
 	Class = np.array(Class)

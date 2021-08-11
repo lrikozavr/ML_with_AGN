@@ -43,4 +43,4 @@ def Rou(data):
 def DataP(data,flag_color):
 	data.fillna(0)
 	data = np.array(data)
-	return  data #Diff(data,flag_color) #Rou(Diff(data))
+	return  Diff(data,flag_color) #Rou(Diff(data))
