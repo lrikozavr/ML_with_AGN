@@ -12,8 +12,8 @@ import time
 #save_pic_path='/home/kiril/github/ML_with_AGN/ML/pic/P_nonerr'
 save_pic_path="/home/kiril/github/ML_data/image_phot"
 
-output_path_mod = "/home/kiril/github/ML_with_AGN/ML/models/mod_dark"
-output_path_weight = "/home/kiril/github/ML_with_AGN/ML/models/weight_dark"
+output_path_mod = "/home/kiril/github/ML_with_AGN/ML/models/mod_def"
+output_path_weight = "/home/kiril/github/ML_with_AGN/ML/models/weight_def"
 
 output_path_predict = "/home/kiril/github/ML_with_AGN/ML/predict/P"
 
@@ -86,9 +86,9 @@ def test(data):
     #data = data.drop(['e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag',
     #                'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
     #                'parallax','parallax_error','pm','pmra','pmra_error','pmdec','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error'], axis=1)
-    data = data.drop(['z','e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag','Jmag','Hmag','Kmag',
-                    'e_gmag','e_rmag','e_imag','e_zmag','e_ymag','gmag','rmag','imag','zmag','ymag',
-                    'parallax_error','pm','pmra_error','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error','bp_rp'], axis=1)
+    data = data.drop(['z','e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag','W1mag','W2mag','W3mag','W4mag','Jmag','Hmag','Kmag',
+                    'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
+                    'parallax_error','pm','pmra_error','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error','bp_rp','phot_bp_mean_mag','phot_rp_mean_mag','phot_g_mean_mag'], axis=1)
     data = data.drop(['parallax','pmra','pmdec'], axis=1)
 #'W1mag','W2mag','W3mag','W4mag','gmag','rmag','imag','zmag','ymag','phot_bp_mean_mag','phot_rp_mean_mag','phot_g_mean_mag'
     #
@@ -117,7 +117,7 @@ def test(data):
     
     #os.mkdir(local_save_pic_path)
     #Many_Graf_pd(data,local_save_pic_path)
-    #Many_Graf_pd(data,local_save_pic_path)
+    #Many_Graf_pd_diff(data,local_save_pic_path)
     
     data = data.drop(['name'],axis=1)
     
@@ -134,7 +134,7 @@ def test(data):
     '''
     #exit()
     print(data.columns.values)
-    train = DataP(data,0)
+    train = DataP(data,1)
     print(train)
     print("Data train shape:	",train.shape)
     print(label)
@@ -178,5 +178,5 @@ def test(data):
 #test(data_agn_star)
 #test(data_agn_qso)
 #test(data_agn_gal)
-test(data_agn_star_qso)
-#test(data_agn_star_qso_gal)
+#test(data_agn_star_qso)
+test(data_agn_star_qso_gal)

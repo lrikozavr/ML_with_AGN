@@ -137,18 +137,19 @@ def Many_Graf_pd_diff(data,save_path):
                     if(not i1==i2 and not j1==j2 and not i1==j1 and not i2==j2 and i1+i2>j1+j2):
                         fig=plt.figure()
                         ax = fig.add_subplot(111)
-                        ax.set_xlabel(name_column[i1] + "-" + name_column[i2],fontsize=40)
-                        ax.set_ylabel(name_column[j1] + "-" + name_column[j2],fontsize=40)
+                        name_axis_x = name_column[i1] + "-" + name_column[i2]
+                        name_axis_y = name_column[j1] + "-" + name_column[j2]
+                        ax.set_xlabel(name_axis_x,fontsize=40)
+                        ax.set_ylabel(name_axis_y,fontsize=40)
                         fig.set_size_inches(20,20)
                         index=2
                         #print(data_.columns.values)
                         for name_ in name:
                             data_0 = data_[name_list == name_]
-                            #Graf_m(ax,data_0[name_column[i1]],0,data_0[name_column[i2]],0,index,name_)
                             Graf_m(ax,data_0[name_column[i1]],data_0[name_column[i2]],data_0[name_column[j1]],data_0[name_column[j2]],index,name_)
                             index+=1
                         ax.legend(loc=1,prop={'size': 20})
-                        fig.savefig(save_path+"/"+str(i1+1)+str(i2+1)+str(j1+1)+str(j2+1)+'.png')
+                        fig.savefig(save_path+"/"+name_axis_x+"_"+name_axis_y+'.png')
                         plt.close(fig)
 
 
