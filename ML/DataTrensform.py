@@ -42,5 +42,27 @@ def Rou(data):
 	
 def DataP(data,flag_color):
 	data.fillna(0)
+	data.info()
+	#data.sum()
 	data = np.array(data)
-	return  Diff(data,flag_color) #Rou(Diff(data))
+	#return Rou(Diff(data,flag_color)) #return  Diff(data,flag_color) #return data 
+	return  Diff(data,flag_color)
+
+def z_round(data1,data2):
+	data_1,data_2 = pd.DataFrame(),pd.DataFrame()
+	for i in np.arange(0,1,0.1):
+		slice_d_1 = data1[(data1.z > i) & (i+0.1 > data1.z)]
+		slice_d_2 = data2[(data2.z > i) & (i+0.1 > data2.z)]
+		
+		if(len(slice_d_2) > len(slice_d_1) and (not len(slice_d_2) == 0 and not len(slice_d_1) == 0) ):
+			size=len(slice_d_1)
+			slice_d_2 = slice_d_2.sample(size)	
+		else:
+			size=len(slice_d_2)
+			slice_d_1 = slice_d_1.sample(size)
+		
+		data_1 = data_1.append(slice_d_1, ignore_index=True)
+		data_2 = data_2.append(slice_d_2, ignore_index=True)
+	return data_1,data_2
+			
+

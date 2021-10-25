@@ -4,9 +4,11 @@ Created on Fri Nov 20 13:33:58 2020
 @author: кирил
 """
 import math
+import os
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+import matplotlib.colors as mcolors
 
 def swap(i,j):
     return j,i
@@ -39,7 +41,8 @@ def qqm(data1,data2):
     
     return rezult1,rezult2
 
-c=['yellow','pink','black','red','blue','magenta','green']
+#c=list(mcolors.CSS4_COLORS)
+c=list(mcolors.TABLEAU_COLORS)
 def Graf(ix,iy,jx,jy,q,w,e,r,name_col1,name_col2,name_col3,name_col4,save_path):  
     fig=plt.figure()
     ax = fig.add_subplot(111)
@@ -78,7 +81,7 @@ def Graf_m(ax,q,w,e,r,index,name):
     x=q-w
     y=e-r
     rez1,rez2=qqm(x,y)
-    ax.scatter(rez1,rez2,s=20,c=c[index],label=name)
+    ax.scatter(rez1,rez2,s=5,c=c[index],label=name)
 
 def Many_Graf_many(data1,data2,data_name,name,save_path,count_column):
     n=count_column
@@ -124,7 +127,7 @@ def Many_Graf_pd(data,save_path):
 
 def Many_Graf_pd_diff(data,save_path):
     name = data['name'].unique()
-    name=np.flip(name)
+    #name=np.flip(name)
     name_list = data['name']
     data_ = data.drop(['name'],axis=1)
     name_column = np.array(data_.columns.values)
@@ -150,7 +153,8 @@ def Many_Graf_pd_diff(data,save_path):
                             index+=1
                         ax.legend(loc=1,prop={'size': 20})
                         fig.savefig(save_path+"/"+name_axis_x+"_"+name_axis_y+'.png')
-                        plt.close(fig)
+                        plt.figure().clear()
+                        #plt.close(fig)
 
 
 def Many_Graf_diff_many(data1,data2,data_name,name,save_path,count_column):
@@ -171,7 +175,41 @@ def Many_Graf_diff_many(data1,data2,data_name,name,save_path,count_column):
                         fig.savefig(save_path+"/"+str(i1+1)+str(i2+1)+str(j1+1)+str(j2+1)+'.png')
                         plt.close(fig)
             
-            
+def z_distribution(data,save_path,func):
+    for i in np.arange(0,1,0.05):
+        slice_d = data[(data.z > i) & (i+0.1 > data.z)]
+        slice_d = slice_d.drop(['z'], axis=1)
+        save_path_ = f"{save_path}/{i}"
+        if not os.path.isdir(save_path_):
+            os.mkdir(save_path_)
+        func(slice_d,save_path_)
+
+def z_distribution_one_img(data,save_path):
+    n = len(data.columns.values) -1
+    for i1 in range(n):
+        for i2 in range(i1,n,1):
+            for j1 in range(n):
+                for j2 in range(j1,n,1):
+                    if(not i1==i2 and not j1==j2 and not i1==j1 and not i2==j2 and i1+i2>j1+j2):
+                        fig=plt.figure()
+                        ax = fig.add_subplot(111)
+                        fig.set_size_inches(20,20)
+                        index=0
+                        #print(data_.columns.values)
+                        for i in np.arange(0,1,0.1):
+                            slice_d = data[(data.z > i) & (i+0.1 > data.z)]
+                            slice_d = slice_d.drop(['z'], axis=1)
+                            name_column = np.array(slice_d.columns.values)
+                            print(name_column)
+                            Graf_m(ax,slice_d[name_column[i1]],slice_d[name_column[i2]],slice_d[name_column[j1]],slice_d[name_column[j2]],index,i)
+                            index+=1
+                        name_axis_x = name_column[i1] + "-" + name_column[i2]
+                        name_axis_y = name_column[j1] + "-" + name_column[j2]
+                        ax.set_xlabel(name_axis_x,fontsize=40)
+                        ax.set_ylabel(name_axis_y,fontsize=40)
+                        ax.legend(loc=1,prop={'size': 20})
+                        fig.savefig(save_path+"/"+name_axis_x+"_"+name_axis_y+'.png')
+                        plt.close(fig)
 ################
 '''
 for i1 in range(7):
@@ -209,7 +247,7 @@ fig.savefig()
 
 #scatter_matrix(data, alpha=0.05, figsize=(10, 10));
 
-def Hist1(x,name):
+def Hist1(x,save_path,name):
     fig=plt.figure()
     ax = fig.add_subplot(1,1,1)
     '''
@@ -236,7 +274,7 @@ def Hist1(x,name):
     #ax.set_title(name,fontsize = 50)
     fig.set_size_inches(30,20)
     ax.hist(rez,bins=200)
-    fig.savefig('/media/kiril/j_08/AGN/excerpt/catalogue/Hist(7)/hist_'+name+'.png')
+    fig.savefig(save_path+'/'+name+'.png')
     plt.close(fig)
 
 def Hist2(n1,n2):

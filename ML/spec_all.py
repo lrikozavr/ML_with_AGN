@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 from ml import NN,LoadModel
-from graf import Many_Graf_pd,Many_Graf_pd_diff,test_ML
+from graf import Many_Graf_pd,Many_Graf_pd_diff,test_ML,z_distribution,Hist1,z_distribution_one_img
 from DataTrensform import DataP
 import os
 import time
@@ -22,6 +22,7 @@ input_path_data_agn = "/home/kiril/github/ML_data/data/agn_end.csv"
 input_path_data_star = "/home/kiril/github/ML_data/data/star_end.csv"
 input_path_data_qso = "/home/kiril/github/ML_data/data/qso_end.csv"
 input_path_data_gal = "/home/kiril/github/ML_data/data/gal_end.csv"
+
 
 data_agn = pd.read_csv(input_path_data_agn, header=0, sep=',',dtype=np.float)
 data_star = pd.read_csv(input_path_data_star, header=0, sep=',',dtype=np.float)
@@ -46,8 +47,13 @@ data_agn_star_gal = data_agn_star.append(data_gal, ignore_index=True)
 data_agn_qso_gal = data_agn_qso.append(data_gal, ignore_index=True)
 data_agn_star_qso_gal = data_agn_star_qso.append(data_gal, ignore_index=True)
 
-
-
+'''
+Hist1(data_gal['z'],save_pic_path,'gal')
+Hist1(data_agn['z'],save_pic_path,'agn')
+Hist1(data_qso['z'],save_pic_path,'qso')
+Hist1(data_star['z'],save_pic_path,'star')
+exit()
+'''
 optimizer = 'adam'
 #loss = 'categorical_crossentropy'
 loss = 'binary_crossentropy'
@@ -82,15 +88,16 @@ def test(data):
     print("Data val size:	",np.size(label))
     print("%",c/label.size *100)
     print(data.columns.values)
+    data = data[(data.z < 1)]
     #
     #data = data.drop(['e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag',
     #                'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
     #                'parallax','parallax_error','pm','pmra','pmra_error','pmdec','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error'], axis=1)
-    data = data.drop(['z','e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag','W1mag','W2mag','W3mag','W4mag','Jmag','Hmag','Kmag',
+    data = data.drop(['e_W1mag','e_W2mag','e_W3mag','e_W4mag','e_Jmag','e_Hmag','e_Kmag','Jmag','Hmag','Kmag','W3mag','W4mag',
                     'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
-                    'parallax_error','pm','pmra_error','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error','bp_rp','phot_bp_mean_mag','phot_rp_mean_mag','phot_g_mean_mag'], axis=1)
+                    'parallax_error','pm','pmra_error','pmdec_error','phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error','bp_rp'], axis=1)
     data = data.drop(['parallax','pmra','pmdec'], axis=1)
-#'W1mag','W2mag','W3mag','W4mag','gmag','rmag','imag','zmag','ymag','phot_bp_mean_mag','phot_rp_mean_mag','phot_g_mean_mag'
+#'W1mag','W2mag','W3mag','W4mag','Jmag','Hmag','Kmag','gmag','rmag','imag','zmag','ymag','phot_bp_mean_mag','phot_rp_mean_mag','phot_g_mean_mag'
     #
     #data = data.drop(['z'], axis=1)
     #
@@ -98,7 +105,7 @@ def test(data):
     #
     #agn_sample,other_sample=data[label == [1],data[label == 0]
     
-    data = data.drop(['label','RA','DEC'],axis=1)
+    data = data.drop(['label','RA','DEC','z'],axis=1)
     name_list = data['name'].unique()
     local_output_path_mod = output_path_mod
     local_output_path_weight = output_path_weight
@@ -117,10 +124,17 @@ def test(data):
     
     #os.mkdir(local_save_pic_path)
     #Many_Graf_pd(data,local_save_pic_path)
+    #z_distribution(data,local_save_pic_path,Many_Graf_pd_diff)
+    
+    #data=data.drop(['name'], axis=1)
+    
+    #z_distribution_one_img(data,local_save_pic_path)
+    
+
     #Many_Graf_pd_diff(data,local_save_pic_path)
-    
+    #exit()
     data = data.drop(['name'],axis=1)
-    
+    #data.info()
     #cols = ['phot_g_mean_mag','phot_bp_mean_mag','phot_rp_mean_mag','gmag','rmag','imag','zmag','ymag','W1mag','W2mag']
     #data = data[cols]
     '''
@@ -134,7 +148,7 @@ def test(data):
     '''
     #exit()
     print(data.columns.values)
-    train = DataP(data,1)
+    train = DataP(data,0)
     print(train)
     print("Data train shape:	",train.shape)
     print(label)
@@ -177,6 +191,44 @@ def test(data):
     
 #test(data_agn_star)
 #test(data_agn_qso)
+#test(data_gal)
 #test(data_agn_gal)
 #test(data_agn_star_qso)
-test(data_agn_star_qso_gal)
+
+#test(data_agn)
+#test(data_agn_star_qso_gal)
+
+input_path_data_AllWS_agn = "/home/kiril/github/ML_data/data/AllWS_agn_end.csv"
+data_AllWS_agn = pd.read_csv(input_path_data_AllWS_agn, header=0, sep=',',dtype=np.float)
+data_AllWS_agn['name'] = "AllWS"
+data_AllWS_agn['label'] = 1
+
+data_agn_star_qso_gal_AllWS = data_agn_star_qso_gal.append(data_AllWS_agn, ignore_index=True)
+
+
+input_path_data_sfr_sfg = "/home/kiril/github/ML_data/data/sfg_end.csv"
+input_path_data_sfr_agn = "/home/kiril/github/ML_data/data/sfr_agn_end.csv"
+input_path_data_sdss_sfg = "/home/kiril/github/ML_data/data/sdss_sfg_end.csv"
+
+data_sfr_sfg = pd.read_csv(input_path_data_sfr_sfg, header=0, sep=',',dtype=np.float)
+data_sfr_agn = pd.read_csv(input_path_data_sfr_agn, header=0, sep=',',dtype=np.float)
+data_sdss_sfg = pd.read_csv(input_path_data_sdss_sfg, header=0, sep=',',dtype=np.float)
+
+data_sfr_agn['name'] = "AGN_SFR"
+data_sfr_sfg['name'] = "SFG_SFR"
+data_sdss_sfg['name'] = "SDSS_SFG"
+
+data_sdss_sfg['label'] = 0
+data_sfr_agn['label'] = 1
+data_sfr_sfg['label'] = 0
+
+data_sfr_agn_sfg = data_sfr_agn.append(data_sfr_sfg, ignore_index=True)
+data_sfr_agn_sfg = data_sfr_agn_sfg.drop(['class'], axis=1)
+data_sfr_agn_sfg['z'] = 0
+data_sfr_agn_sfg_sdss_sfg = data_sfr_agn_sfg.append(data_sdss_sfg, ignore_index=True)
+
+data_agn_star_qso_gal_AllWS_sfr_agn_sfg = data_agn_star_qso_gal_AllWS.append(data_sfr_agn_sfg, ignore_index=True)
+
+#test(data_agn_star_qso_gal_AllWS)
+#test(data_sfr_agn_sfg)
+test(data_sfr_agn_sfg_sdss_sfg)
