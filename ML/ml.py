@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 #from keras.layers.normalization import BatchNormalization
 import os
+import math
 
 from keras.layers import Input, Dense, Dropout
 from keras.layers import experimental, Conv2D, SeparableConv2D, MaxPooling2D, GlobalAveragePooling2D, Activation, add
@@ -312,7 +313,7 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	g.close()
 
 	count = 0
-	Tq, Fq, Ts, Fs = 0,0,0,0
+	TP, FP, TN, FN = 0,0,0,0
 	for i in range(y_test.shape[0]):
 		#print(Tq,Fq,Ts,Fs)
 		if(Class[i]<0.5):
@@ -323,20 +324,26 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 			count+=1
 		if(Class[i]==1):
 			if(Class[i]==y_test[i]):
-				Tq += 1
+				TP += 1
 			else:
-				Fq += 1
+				FP += 1
 		if(Class[i]==0):
 			if(Class[i]==y_test[i]):
-				Ts += 1
+				TN += 1
 			else:
-				Fs += 1
-	print("Accuracy:",              count/y_test.shape[0])
-	print("AGN precision:",     Tq/(Tq+Fq))
-	print("nonAGN precision:",    Ts/(Ts+Fs))
-	print("AGN completness:",       Tq/(Tq+Fs))
-	print("nonAGN completness:",     Ts/(Ts+Fq))
-	print("AGN_F:",     2*(Tq/(Tq+Fq)*Tq/(Tq+Fs))/(Tq/(Tq+Fq)+Tq/(Tq+Fs)) )
-	print("non_AGN_F:",     2*(Ts/(Ts+Fs)*Ts/(Ts+Fq))/(Ts/(Ts+Fq)+Ts/(Ts+Fs)) )
-
+				FN += 1
+	print("Accuracy 				[worst: 0; best: 1]:",              count/y_test.shape[0])
+	print("AGN purity 				[worst: 0; best: 1]:",     TP/(TP+FP))
+	print("nonAGN precision 			[worst: 0; best: 1]:",    TN/(TN+FN))
+	print("AGN completness 			[worst: 0; best: 1]:",       TP/(TP+FN))
+	print("nonAGN completness 			[worst: 0; best: 1]:",     TN/(TN+FP))
+	print("F1  					[worst: 0; best: 1]:",		2*TP/(2*TP+FP+FN))
+	#print("AGN_F:",     2*(Tq/(Tq+Fq)*Tq/(Tq+Fs))/(Tq/(Tq+Fq)+Tq/(Tq+Fs)) )
+	#print("non_AGN_F:",     2*(Ts/(Ts+Fs)*Ts/(Ts+Fq))/(Ts/(Ts+Fq)+Ts/(Ts+Fs)) )
+	print("FPR (false positive rate) 		[worst: 1; best: 0]:",		FP/(TN+FN))
+	print("TNR (true negative rate) 		[worst: 0; best: 1]:",		TN/(TN+FN))
+	print("bACC (balanced accuracy) 		[worst: 0; best: 1]:", (TP/(TP+FP)+TN/(TN+FN))/2.)
+	print("K (Cohen's Kappa) 			[worst:-1; best:+1]:",		2*(TP*TN-FN*FP)/((TP+FP)*(FP+TN)+(TP+FN)*(FN+TN)))
+	print("MCC (Matthews Correlation Coef) 	[worst:-1; best:+1]:",		(TP*TN-FP*FN)/math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN)))
+	print("BinaryBS (Brierscore) 			[worst: 1; best: 0]:", (FP+FN)/(TP+FP+FN+TN))
 	SaveModel(model,output_path_mod,output_path_weight)

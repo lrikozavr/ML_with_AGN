@@ -29,24 +29,25 @@ def Rou(data):
 	features = data.shape[1]
 	#print(features)
 	#print(data)
+	info = pd.DataFrame()
 	means = np.zeros(features)
 	stds = np.zeros(features)
 	Result = np.array(data)
 	for i in range(features):
 		means[i] = np.mean(data[:,i])
 		stds[i] = np.std(data[:,i])
+		info[str(i)] = [means[i],stds[i],np.min(data[:,i]),np.max(data[:,i])]
 		Result[:,i] = (data[:,i] - means[i])/stds[i]
-	#print(Result)
 	print("Normalisation Data")
-	return Result
+	return Result, info
 	
 def DataP(data,flag_color):
 	data.fillna(0)
 	data.info()
 	#data.sum()
 	data = np.array(data)
-	#return Rou(Diff(data,flag_color)) #return  Diff(data,flag_color) #return data 
-	return  Diff(data,flag_color)
+	return Rou(Diff(data,flag_color)) #return  Diff(data,flag_color) #return data 
+	#return  Diff(data,flag_color)
 
 def z_round(data1,data2):
 	data_1,data_2 = pd.DataFrame(),pd.DataFrame()
