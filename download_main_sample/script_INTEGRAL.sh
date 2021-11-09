@@ -15,7 +15,7 @@ if($1=="" && $10!="XBONG")
 }
 }' > $file_name.ext.tsv 
 wc -l $file_name.ext.tsv
-cat_name="INTEGRAL_AGN"
+cat_name="INTEGRAL"
 echo -e "RA\tDEC\tz\tCLASS" > $cat_name.tsv
 LC_ALL=en_US.utf8   sort -k2 -g $file_name.ext.tsv >> $cat_name.tsv
 

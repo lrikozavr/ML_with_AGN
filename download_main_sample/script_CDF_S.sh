@@ -15,7 +15,7 @@ if(($9=="Secure" && $10=="AGN") && $11=="-")
 }
 }' > $file_name.ext.tsv 
 wc -l $file_name.ext.tsv
-cat_name="CDF_S_AGN"
+cat_name="CDF_S"
 echo -e "RA\tDEC\tz\tCLASS" > $cat_name.tsv
 LC_ALL=en_US.utf8   sort -k2 -g $file_name.ext.tsv >> $cat_name.tsv
 

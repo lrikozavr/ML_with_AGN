@@ -21,7 +21,7 @@ for i in open("table.ext.tsv"):
 	f.write(str((float(line[1]+line[2])+float(line[3]+line[4])/60.+float(line[5]+line[6]+line[7]+line[8])/3600.)*15)+"\t"+str(int(line[9]+"1")*(float(line[10]+line[11])+float(line[12]+line[13])/60.+float(line[14]+line[15])/3600.))+"\t"+n[1]+"\t"+n[2]+"\t"+n[3])
 f.close()
 EOF
-cat_name="AGN_XBS"
+cat_name="XBS"
 echo -e "RA\tDEC\tCLASS\tz\tSample" > $cat_name.tsv
 LC_ALL=en_US.utf8   sort -k2 -g $file_name.ext.rd.tsv >> $cat_name.tsv
 
