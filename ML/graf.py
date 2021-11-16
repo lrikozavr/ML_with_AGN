@@ -247,7 +247,7 @@ fig.savefig()
 
 #scatter_matrix(data, alpha=0.05, figsize=(10, 10));
 
-def Hist1(x,save_path,name):
+def Hist1(x,save_path,name,mag):
     fig=plt.figure()
     ax = fig.add_subplot(1,1,1)
     '''
@@ -267,7 +267,7 @@ def Hist1(x,save_path,name):
     '''
     rez=qq(x)
     fig.suptitle(name, fontsize=50)       
-    ax.set_xlabel("mag",fontsize=40)
+    ax.set_xlabel(mag,fontsize=40)
     ax.set_ylabel("count",fontsize=40)
     ax.tick_params(axis='x', labelsize=30)
     ax.tick_params(axis='y', labelsize=30)
