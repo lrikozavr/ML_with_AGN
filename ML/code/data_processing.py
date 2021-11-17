@@ -1,0 +1,63 @@
+#!/home/kiril/python_env_iron_ment/new_proj/bin/python
+# -*- coding: utf-8 -*-
+
+import pandas as pd
+import numpy as np
+import os
+
+from fuzzy_err_calc import fuzzy_dist,fuzzy_err, Normali
+
+path_sample = '/home/kiril/github/AGN_article_final_data/sample/sample'
+agn_name = ['agn_type_1','agn_type_2','blazar']
+sfr_name = 'sfg'
+qso_name = 'qso'
+star_name = 'star'
+
+data_agn_type_1 = pd.read_csv(f"{path_sample}/{agn_name[0]}.csv", header=0, sep=',', dtype=np.float)
+data_agn_type_2 = pd.read_csv(f"{path_sample}/{agn_name[1]}.csv", header=0, sep=',', dtype=np.float)
+data_agn_blazar = pd.read_csv(f"{path_sample}/{agn_name[2]}.csv", header=0, sep=',', dtype=np.float)
+data_sfg = pd.read_csv(f"{path_sample}/{sfr_name}.csv", header=0, sep=',', dtype=np.float)
+data_qso = pd.read_csv(f"{path_sample}/{qso_name}.csv", header=0, sep=',', dtype=np.float)
+data_star = pd.read_csv(f"{path_sample}/{star_name}.csv", header=0, sep=',', dtype=np.float)
+
+data_agn_type_1['type'] = "type_1"
+data_agn_type_2['type'] = "type_2"
+data_agn_blazar['type'] = "blazar"
+data_sfg['type'] = 'none'
+data_qso['type'] = 'none'
+data_star['type'] = 'none'
+
+data_agn_type_1_2 = data_agn_type_1.append(data_agn_type_2, ignore_index=True)
+data_agn = data_agn_blazar.append(data_agn_type_1_2, ignore_index=True)
+
+data_agn['name'] = "AGN"
+data_sfg['name'] = "SFG"
+data_qso['name'] = "QSO"
+data_star['name'] = "STAR"
+
+data_agn_sfg = data_agn.append(data_sfg, ignore_index=True)
+data_agn_sfg_qso = data_agn_sfg.append(data_qso, ignore_index=True)
+data_agn_sfg_qso_star = data_agn_sfg_qso.append(data_star, ignore_index=True)
+
+data = data_agn_sfg_qso_star
+print(data)
+
+#Отсекаем изначально ненужное (Значения часто пустые)
+data = data.drop(['e_Jmag','e_Hmag','e_Kmag','Jmag','Hmag','Kmag',
+                    'parallax','pmra','pmdec','parallax_error','pm','pmra_error','pmdec_error','bp_rp'], axis=1)
+#для fuzzy_err
+data_err = data.drop(['W1mag','W2mag','W3mag','W4mag',
+                    'gmag','rmag','imag','zmag','ymag',
+                    'phot_g_mean_mag','phot_bp_mean_mag','phot_rp_mean_mag'], axis=1)
+#для fuzzy_dist
+data_dist = data.drop(['e_W1mag','e_W2mag','e_W3mag','e_W4mag',
+                    'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
+                    'phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error'], axis=1)
+
+data['fuzzy_err'] = Normali(fuzzy_err(data_err))
+data['fuzzy_dist'] = Normali(fuzzy_dist(data_dist))
+
+data.to_csv('main_sample.csv', index=False)
+
+training_data = data.sample(20000, random_state=1)
+training_data.to_csv('training_sample.csv', index=False)
