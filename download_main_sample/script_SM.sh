@@ -9,20 +9,21 @@ rm $file_name.dat
 rm $arx_name
 
 awk '{
-if($4 > 0.61/($5-0.05+0.0001)+1.3 && $4 < 0.61/($5-0.47+0.0001)+1.19) 
+if($5!=0.05 && $5!=0.47){
+if($4 > 0.61/($5-0.05)+1.3 && $4 < 0.61/($5-0.47)+1.19) 
 {
 	printf("%s\t%s\t%s\t%s\t%s\tK03\n",$1,$2,$3,$4,$5)
 }
 else{
-	if($4 > 0.61/($5-0.47+0.0001)+1.19)
+	if($4 > 0.61/($5-0.47)+1.19)
 	{
 		printf("%s\t%s\t%s\t%s\t%s\tK01\n",$1,$2,$3,$4,$5)
 	}
-}
+} }
 }' $file_name.tsv > $file_name.ext.tsv 
 wc -l $file_name.ext.tsv
 cat_name="SM"
-echo -e "RA\tDEC\tz\t(log([NII]/Ha)\tlog([OIII]/Hb)\tCLASS" > $cat_name.tsv
+echo -e "RA\tDEC\tz\tlog([OIII]/Hb)\tlog([NII]/Ha)\tCLASS" > $cat_name.tsv
 LC_ALL=en_US.utf8   sort -k2 -g $file_name.ext.tsv >> $cat_name.tsv
 
 rm $file_name.tsv

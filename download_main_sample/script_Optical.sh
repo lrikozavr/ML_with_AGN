@@ -5,10 +5,7 @@ file_name="table"
 
 
 awk '{
-if($3=="T1" || $3=="K01") 
-{
 	printf("%f\t%f\t%s\n",$1,$2,$3)
-}
 }' $file_name.tsv > $file_name.ext.tsv 
 wc -l $file_name.ext.tsv
 cat_name="OC"

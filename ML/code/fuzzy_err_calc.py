@@ -33,7 +33,7 @@ def fuzzy_dist(data):
     for i in range(count):
         ev_sum = 0
         for col in columns:
-            ev_sum += (rc[col] - data[i][col])**2
+            ev_sum += (rc[col] - data[col].iloc[i])**2
         r.append(math.sqrt(ev_sum))
         if(r > max):
             max = r[i]
@@ -43,6 +43,7 @@ def fuzzy_dist(data):
 def fuzzy_err(data):
     columns = data.columns.values
     count = len(data)
+    print(count,columns)
 
     summ = []
     max = -1
@@ -50,11 +51,8 @@ def fuzzy_err(data):
     for i in range(count):
         sum = 0
         for col in columns:
-            sum += data[i][col]
+            sum += data[col].iloc[i]
         summ.append(sum)
         if(sum > max):
             max=sum
-    return summ, max
-
-Normali(fuzzy_err(data))
-Normali(fuzzy_dist(data))
+    return summ,max

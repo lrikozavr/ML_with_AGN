@@ -11,12 +11,12 @@ if(($9=="Secure" && $10=="AGN") && $11=="-")
 {
 	RA=($1+$2/60.+$3/3600.)*15
 	DEC=$4 $5+$6/60.+$7/3600.
-	printf("%s\t%s\t%s\t%s\n",RA,DEC,$8,$10)
+	printf("%s\t%s\t%s\n",RA,DEC,$8)
 }
 }' > $file_name.ext.tsv 
 wc -l $file_name.ext.tsv
 cat_name="CDF_S"
-echo -e "RA\tDEC\tz\tCLASS" > $cat_name.tsv
+echo -e "RA\tDEC\tz" > $cat_name.tsv
 LC_ALL=en_US.utf8   sort -k2 -g $file_name.ext.tsv >> $cat_name.tsv
 
 rm $file_name.tsv

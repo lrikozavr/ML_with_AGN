@@ -4,20 +4,20 @@
 import pandas as pd
 import numpy as np
 import os
-from ml_decide import et,rf,dm,logreg,svm,xgb
+from ml_decide import et,rf,dm,logreg,sv,xg
 from sklearn.utils.fixes import loguniform
 import training_utils
 from sklearn.model_selection import train_test_split
 
-training_data = pd.read_csv("training_sample.csv", header=0, sep=',', dtype=np.float)
-general_data = pd.read_csv("main_sample.csv", header=0, sep=',', dtype=np.float)
+training_data = pd.read_csv("training_sample.csv", header=0, sep=',')
+general_data = pd.read_csv("main_sample.csv", header=0, sep=',')
 
 info_columns = ['name','type']
 
 fuzzy_options = ["normal", "fuzzy_dist", "fuzzy_err"]
 
-features = ['W1mag','W2mag','W3mag','W4mag',
-            'e_W1mag','e_W2mag','e_W3mag','e_W4mag',
+features = ['W1mag','W2mag','W3mag',
+            'e_W1mag','e_W2mag','e_W3mag',
             'gmag','rmag','imag','zmag','ymag',
             'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
             'phot_g_mean_mag','phot_bp_mean_mag','phot_rp_mean_mag',
@@ -29,7 +29,7 @@ output_path = "./results"
 for fuzzy_option in fuzzy_options:
     
     print(fuzzy_option)
-
+    '''
     train_X = training_data[features].values
     general_X = general_data[features].values
 
@@ -54,9 +54,10 @@ for fuzzy_option in fuzzy_options:
         general_X, general_data, training_data, train_X, 
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "rf_not_b", info_columns, features)
+    '''
 # scale features of the data:
     train_X, general_X = training_utils.scale_X_of_the_data(training_data[features], general_data[features])
-
+    '''
     params = {"penalty": ["l1", "l2"],#, "elasticnet"],
               'C': loguniform(1e0, 1e3)}
     
@@ -68,14 +69,14 @@ for fuzzy_option in fuzzy_options:
         general_X, general_data, training_data, train_X, 
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "logreg_not_b", info_columns, features)
-
+    '''
     params = {'C': loguniform(1e0, 1e3),
 	          'gamma': loguniform(1e-4, 1e-2)}
-    svm(fuzzy_option,'balanced',params, 
+    sv(fuzzy_option,'balanced',params, 
         general_X, general_data, training_data, train_X, 
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "svm_b", info_columns, features)
-    svm(fuzzy_option,None,params, 
+    sv(fuzzy_option,None,params, 
         general_X, general_data, training_data, train_X, 
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "svm_not_b", info_columns, features)
@@ -95,11 +96,11 @@ for fuzzy_option in fuzzy_options:
 	           'lambda': [1, 2, 4],
 	           'alpha': [0, 1, 2]}
 	#class_weight= 7 (balanced), 1 (not)
-    xgb(fuzzy_option,7,params, 
-        general_X, general_data, training_data, train_X, 
+    xg(fuzzy_option,7,params, 
+        general_X, general_data, training_data, train_X, training_part, test_X, test_part,
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "xgb_b", info_columns, features)
-    xgb(fuzzy_option,1,params, 
-        general_X, general_data, training_data, train_X, 
+    xg(fuzzy_option,1,params, 
+        general_X, general_data, training_data, train_X, training_part, test_X, test_part,
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "xgb_not_b", info_columns, features)

@@ -26,32 +26,6 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 import training_utils
-'''
-experiment_name = "dummy"
-print(experiment_name)
-experiment_name = "et_balanced"
-print(experiment_name)
-experiment_name = "et_not_balanced"
-print(experiment_name)
-experiment_name = "logistic_balanced"
-print(experiment_name)
-experiment_name = "logistic_not_balanced"
-print(experiment_name)
-experiment_name = "rf_balanced"
-print(experiment_name)
-experiment_name = "rf_not_balanced"
-print(experiment_name)
-experiment_name = "stacked_classifier"
-print(experiment_name)
-experiment_name = "svm_balanced"
-print(experiment_name)
-experiment_name = "svm_not_balanced"
-print(experiment_name)
-experiment_name = "xgb_balanced"
-print(experiment_name)
-experiment_name = "xgb_not_balanced"
-print(experiment_name)
-'''
 #------------------------------------ TRAINING: --------------------------------------
 
 def fuzzy_1(clf,train_X,training_data,fuzzy_option,fuzzy_dist_column,fuzzy_err_column):
@@ -92,7 +66,9 @@ def fuzzy_2(clf_gs,train_X,training_part,test_X,test_part,fuzzy_option,fuzzy_dis
         exit()
     return clf_gs
 
-def ml_volume_1(general_X, general_data, training_data, train_X, clf, fuzzy_option, fuzzy_dist_column, fuzzy_err_column, output_path, experiment_name, info_columns, features):
+def ml_volume_1(general_X, general_data, training_data, train_X, clf, 
+                fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
+                output_path, experiment_name, info_columns, features):
     metrics, std = training_utils.evaluate_on_cv(training_data, train_X, clf, 
                                                  fuzzy_option, fuzzy_dist_column, fuzzy_err_column)
     pr_curve = training_utils.predict_and_pr_curve_on_cv(training_data, train_X, clf,
@@ -109,7 +85,9 @@ def ml_volume_1(general_X, general_data, training_data, train_X, clf, fuzzy_opti
                  info_columns, features)
     print("done.")
 
-def ml_volume_2(general_X, general_data, training_data, train_X, clf_for_eval, clf_gs, fuzzy_option, fuzzy_dist_column, fuzzy_err_column, output_path, experiment_name, info_columns, features, xgb_flag=False):
+def ml_volume_2(general_X, general_data, training_data, train_X, clf_for_eval, clf_gs, 
+                fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
+                output_path, experiment_name, info_columns, features, xgb_flag=False):
     # grid search results data frame:
     gs_results_df = training_utils.get_gs_results(clf_gs)
     
@@ -134,7 +112,7 @@ def ml_volume_2(general_X, general_data, training_data, train_X, clf_for_eval, c
                  training_data, general_data, metrics, std, pr_curve, best_param_df, gs_results_df,
                  info_columns, features)
     
-	print("done.")
+    print("done.")
 
 def dm(fuzzy_option, 
         general_X, general_data, training_data, train_X, 
@@ -168,20 +146,20 @@ def logreg(fuzzy_option,class_weight,params,
     clf = LogisticRegression(class_weight=class_weight,
                              solver='saga',
                              random_state=476,
-                             max_iter=10000,
+                             max_iter=1000,
                              n_jobs=-1)         #ZMIEŃ
                              
     
     clf_for_eval = LogisticRegression(class_weight=class_weight,
                              solver='saga',
                              random_state=476,
-                             max_iter=10000,
+                             max_iter=1000,
                              n_jobs=-1)
                              
     
     # create grid search instance:
     clf_gs = RandomizedSearchCV(estimator=clf, param_distributions=params, 
-                                n_iter=1000, scoring='f1', n_jobs=-1, 
+                                n_iter=500, scoring='f1', n_jobs=-1, 
                                 cv=ShuffleSplit(n_splits=100, test_size=0.2),  
                                 refit=True, verbose=0)    #ZMIEŃ
    
@@ -207,14 +185,14 @@ def rf(fuzzy_option,class_weight,
     	fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features)
 
-def svm(fuzzy_option,class_weight,params, 
+def sv(fuzzy_option,class_weight,params, 
         general_X, general_data, training_data, train_X, 
-    	fuzzy_dist_column, fuzzy_err_column, 
-    	output_path, experiment_name, info_columns, features):
+        fuzzy_dist_column, fuzzy_err_column, 
+        output_path, experiment_name, info_columns, features):
     clf = svm.SVC(gamma='scale',
                   kernel='rbf',
                   probability=True,
-                  class_weight=class_weight,
+                  class_weight='balanced',
                   cache_size=5000,
                   random_state=476)
     
@@ -227,7 +205,7 @@ def svm(fuzzy_option,class_weight,params,
     
     # create grid search instance:
     clf_gs = RandomizedSearchCV(estimator=clf, param_distributions=params, 
-                                n_iter=1000, scoring='f1', n_jobs=-1, 
+                                n_iter=500, scoring='f1', n_jobs=-1, 
                                 cv=ShuffleSplit(n_splits=100, test_size=0.2),   
                                 refit=True, verbose=0)    #ZMIEŃ
    
@@ -238,8 +216,8 @@ def svm(fuzzy_option,class_weight,params,
     	fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features)
 
-def xgb(fuzzy_option,class_weight,params, 
-        general_X, general_data, training_data, train_X, 
+def xg(fuzzy_option,class_weight,params, train_X, training_part, test_X, test_part,
+        general_X, general_data, training_data,  
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features):
     clf = xgb.XGBClassifier(n_estimators=500, 
@@ -254,7 +232,7 @@ def xgb(fuzzy_option,class_weight,params,
     
     # create grid search instance:
     clf_gs = RandomizedSearchCV(estimator=clf, param_distributions=params, 
-                                n_iter=1000, scoring='f1', n_jobs=-1, 
+                                n_iter=500, scoring='f1', n_jobs=-1, 
                                 cv=ShuffleSplit(n_splits=100, test_size=0.2),  
                                 refit=True, verbose=0)    #ZMIEŃ
    
@@ -265,4 +243,3 @@ def xgb(fuzzy_option,class_weight,params,
     ml_volume_2(general_X, general_data, training_data, train_X, clf_for_eval, clf_gs, 
     	fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features, xgb_flag=True)
-
