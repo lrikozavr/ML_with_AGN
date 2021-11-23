@@ -1,6 +1,7 @@
 #!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
 #from keras.layers.normalization import BatchNormalization
+import pandas as pd
 import os
 import math
 
@@ -252,9 +253,87 @@ def Start_IMG():
 		PreDelete(origin_path,_name[0],_name[1])
 		Image_ML(origin_path, image_size, batch_size, epochs, test_path, path_model, path_weights)
 
+def eval(y,y_pred,n):
+	count = 0
+	TP, FP, TN, FN = 0,0,0,0
+	for i in range(n):
+		if(y[i]<0.5):
+			y[i] = 0
+		if(y[i]>=0.5):
+			y[i] = 1
+		if(y[i]==y_pred[i]):
+			count+=1
+		if(y[i]==1):
+			if(y[i]==y_pred[i]):
+				TP += 1
+			else:
+				FP += 1
+		if(y[i]==0):
+			if(y[i]==y_pred[i]):
+				TN += 1
+			else:
+				FN += 1
+	Acc = count/n
+	pur_a = TP/(TP+FP)
+	pur_not_a = TN/(TN+FN)
+	com_a = TP/(TP+FN)
+	com_not_a = TN/(TN+FP)
+	f1 = 2*TP/(2*TP+FP+FN)
+	fpr = FP/(TN+FN)
+	tnr = TN/(TN+FN)
+	bAcc = (TP/(TP+FP)+TN/(TN+FN))/2.
+	k = 2*(TP*TN-FN*FP)/((TP+FP)*(FP+TN)+(TP+FN)*(FN+TN))
+	mcc = (TP*TN-FP*FN)/math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
+	BinBs = (FP+FN)/(TP+FP+FN+TN)
+
+	print(np.array([Acc,pur_a,pur_not_a,com_a,com_not_a,f1,fpr,tnr,bAcc,k,mcc,BinBs]))
+	ev = pd.DataFrame([np.array([Acc,pur_a,pur_not_a,com_a,com_not_a,f1,fpr,tnr,bAcc,k,mcc,BinBs])], 
+    columns=['Accuracy','AGN_purity','nonAGN_precision','AGN_completness','nonAGN_completness','F1',
+    'FPR','TNR','bACC','K','MCC','BinaryBS'])
+
+	print("Accuracy 				[worst: 0; best: 1]:",              Acc)
+	print("AGN purity 				[worst: 0; best: 1]:",     pur_a)
+	print("nonAGN precision 			[worst: 0; best: 1]:",    pur_not_a)
+	print("AGN completness 			[worst: 0; best: 1]:",       com_a)
+	print("nonAGN completness 			[worst: 0; best: 1]:",     com_not_a)
+	print("F1  					[worst: 0; best: 1]:",		f1)
+	#print("AGN_F:",     2*(Tq/(Tq+Fq)*Tq/(Tq+Fs))/(Tq/(Tq+Fq)+Tq/(Tq+Fs)) )
+	#print("non_AGN_F:",     2*(Ts/(Ts+Fs)*Ts/(Ts+Fq))/(Ts/(Ts+Fq)+Ts/(Ts+Fs)) )
+	print("FPR (false positive rate) 		[worst: 1; best: 0]:",		fpr)
+	print("TNR (true negative rate) 		[worst: 0; best: 1]:",		tnr)
+	print("bACC (balanced accuracy) 		[worst: 0; best: 1]:", bAcc)
+	print("K (Cohen's Kappa) 			[worst:-1; best:+1]:",		k)
+	print("MCC (Matthews Correlation Coef) 	[worst:-1; best:+1]:",		mcc)
+	print("BinaryBS (Brierscore) 			[worst: 1; best: 0]:", BinBs)
+
+	return ev
+
+def ml_volume(X_train,y_train,X_test,y_test,
+	model,optimizer,loss,num_ep,batch_size,validation_split,
+	output_path_predict,path_save_eval,name):
+	
+	model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
+	model.fit(X_train, y_train,
+		epochs=num_ep,
+		verbose=1,
+		batch_size=batch_size,
+		validation_split=validation_split)
+	model.evaluate(X_test, y_test, verbose=1)
+	model.summary()
+	Class = model.predict(X_test, batch_size)
+	#print(Class)
+	Class = np.array(Class)
+	
+	g=open(output_path_predict,'w')
+	Class.tofile(g,"\n")
+	g.close()
+
+	ev = eval(Class,y_test,y_test.shape[0])
+	ev.to_csv(f'{path_save_eval}/ml_{name}_evaluate.csv', index=False)
+	return model
 
 
-def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight):
+def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight,path_save_eval):
 	X_train, X_test, y_train, y_test = train_test_split(train, label, 
 														test_size = test_size, random_state = 56) #0.4
 	#print(X_train, X_test, y_train, y_test)
@@ -268,12 +347,26 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	#num_ep = 15
 	features = train.shape[1]
 	print(features)
-	model = DeepDenseNN(features)
-	#model = DeepDarkDenseNN(features)
-	#model = NoDeepDenseNN(features)
 	
+	model = DeepDenseNN(features)	
+	model1 = ml_volume(X_train,y_train,X_test,y_test,
+	model,optimizer,loss,num_ep,batch_size,validation_split,
+	output_path_predict,path_save_eval,'normal')
+	
+	model = DeepDarkDenseNN(features)
+	model2 = ml_volume(X_train,y_train,X_test,y_test,
+	model,optimizer,loss,num_ep,batch_size,validation_split,
+	output_path_predict,path_save_eval,'dark')
+
+	model = NoDeepDenseNN(features)
+	model3 = ml_volume(X_train,y_train,X_test,y_test,
+	model,optimizer,loss,num_ep,batch_size,validation_split,
+	output_path_predict,path_save_eval,'no')
+
+	'''
 	model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
 	####
+	'''
 	'''
 	weights_history = []
 	import keras
@@ -290,6 +383,7 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 			weights_history.append(weights)
 	callback = MyCallback()
 	'''
+	'''
 	####
 	model.fit(X_train, y_train,
 			epochs=num_ep,
@@ -300,18 +394,24 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	model.evaluate(X_test, y_test, verbose=1)
 	model.summary()
 	'''
+	'''
 	plt.figure(1, figsize=(6, 3))
 	plt.plot(weights_history)
 	plt.savefig('1231231.jpg')
 	'''
+	'''
 	Class = model.predict(X_test, batch_size)
-	print(Class)
+	#print(Class)
 	Class = np.array(Class)
 	
 	g=open(output_path_predict,'w')
 	Class.tofile(g,"\n")
 	g.close()
 
+	ev = eval(Class,y_test,y_test.shape[0])
+	ev.to_csv(f'{path_save_eval}/ml_evaluate.csv', index=False)
+	'''
+	'''
 	count = 0
 	TP, FP, TN, FN = 0,0,0,0
 	for i in range(y_test.shape[0]):
@@ -346,4 +446,5 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	print("K (Cohen's Kappa) 			[worst:-1; best:+1]:",		2*(TP*TN-FN*FP)/((TP+FP)*(FP+TN)+(TP+FN)*(FN+TN)))
 	print("MCC (Matthews Correlation Coef) 	[worst:-1; best:+1]:",		(TP*TN-FP*FN)/math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN)))
 	print("BinaryBS (Brierscore) 			[worst: 1; best: 0]:", (FP+FN)/(TP+FP+FN+TN))
+	'''
 	SaveModel(model,output_path_mod,output_path_weight)

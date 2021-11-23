@@ -216,7 +216,8 @@ def sv(fuzzy_option,class_weight,params,
     	fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features)
 
-def xg(fuzzy_option,class_weight,params, train_X, training_part, test_X, test_part,
+def xg(fuzzy_option,class_weight,params, 
+        train_X, training_part, test_X, test_part,
         general_X, general_data, training_data,  
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features):
