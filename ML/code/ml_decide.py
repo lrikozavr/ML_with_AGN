@@ -146,21 +146,21 @@ def logreg(fuzzy_option,class_weight,params,
     clf = LogisticRegression(class_weight=class_weight,
                              solver='saga',
                              random_state=476,
-                             max_iter=1000,
+                             max_iter=500,
                              n_jobs=-1)         #ZMIEŃ
                              
     
     clf_for_eval = LogisticRegression(class_weight=class_weight,
                              solver='saga',
                              random_state=476,
-                             max_iter=1000,
+                             max_iter=500,
                              n_jobs=-1)
                              
     
     # create grid search instance:
     clf_gs = RandomizedSearchCV(estimator=clf, param_distributions=params, 
-                                n_iter=500, scoring='f1', n_jobs=-1, 
-                                cv=ShuffleSplit(n_splits=100, test_size=0.2),  
+                                n_iter=1, scoring='f1', n_jobs=-1, 
+                                cv=ShuffleSplit(n_splits=1, test_size=0.2),  
                                 refit=True, verbose=0)    #ZMIEŃ
    
     # fit to the data:
@@ -205,8 +205,8 @@ def sv(fuzzy_option,class_weight,params,
     
     # create grid search instance:
     clf_gs = RandomizedSearchCV(estimator=clf, param_distributions=params, 
-                                n_iter=500, scoring='f1', n_jobs=-1, 
-                                cv=ShuffleSplit(n_splits=100, test_size=0.2),   
+                                n_iter=1, scoring='f1', n_jobs=-1, 
+                                cv=ShuffleSplit(n_splits=1, test_size=0.2),   
                                 refit=True, verbose=0)    #ZMIEŃ
    
     # fit to the data:
@@ -221,20 +221,20 @@ def xg(fuzzy_option,class_weight,params,
         general_X, general_data, training_data,  
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features):
-    clf = xgb.XGBClassifier(n_estimators=500, 
+    clf = xgb.XGBClassifier(n_estimators=1, 
                             objective='binary:logistic',
                             verbosity=0,
                             scale_pos_weight=class_weight) # jesli balanced to 7. Jeśli nie, to usunąć ten element (default 1).
     
-    clf_for_eval = xgb.XGBClassifier(n_estimators=500, 
+    clf_for_eval = xgb.XGBClassifier(n_estimators=1, 
                             objective='binary:logistic',
                             verbosity=0,
                             scale_pos_weight=class_weight) # jesli balanced to 7. Jeśli nie, to usunąć ten element (default 1). 
     
     # create grid search instance:
     clf_gs = RandomizedSearchCV(estimator=clf, param_distributions=params, 
-                                n_iter=500, scoring='f1', n_jobs=-1, 
-                                cv=ShuffleSplit(n_splits=100, test_size=0.2),  
+                                n_iter=1, scoring='f1', n_jobs=-1, 
+                                cv=ShuffleSplit(n_splits=1, test_size=0.2),  
                                 refit=True, verbose=0)    #ZMIEŃ
    
 

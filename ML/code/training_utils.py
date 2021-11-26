@@ -53,7 +53,7 @@ def evaluate_on_cv(training_data, train_X, clf_for_eval, fuzzy_option, fuzzy_dis
     
     all_cv_metrics = []
     #Случайно формирует валидационную выборку
-    shuffle_split = ShuffleSplit(n_splits=1, test_size=0.2)#100
+    shuffle_split = ShuffleSplit(n_splits=5, test_size=0.2)#100
     
     #100 раз случайно формирует тестовую и тренеровочную выбороки с коэфом разделения 0.2
     for train_index, test_index in shuffle_split.split(train_X):
@@ -125,8 +125,9 @@ def predict_and_pr_curve_on_cv(training_data, train_X, clf_for_eval,
     training_data["y_prob_positive_class"] = 999
 
     i = 0
-    for train_index, test_index in kfold.split(training_data):
+    for train_index, test_index in kfold.split(train_X):
 
+        #print(train_index,len(train_index),len(test_index),len(train_X))
         k_train_X = train_X[train_index]
         k_train_Y = training_data["Y"].values[train_index]
     
@@ -180,9 +181,6 @@ def predict_and_pr_curve_on_cv(training_data, train_X, clf_for_eval,
             pr_curve_df = pd.DataFrame({"precision": precision, "recall": recall, 
                                         "thresholds": np.append(thresholds, 9999)})
             i+=1
-            
-        else:
-            pass
     
     return pr_curve_df
         

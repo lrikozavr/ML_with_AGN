@@ -37,15 +37,15 @@ output_path = "./results"
 
 #NN(training_data[features].values,training_data["Y"].values,0.4,0.4,1024,100,'adam','binary_crossentropy',
 #'/home/kiril/github/AGN_article_final_data/inform/predict','/home/kiril/github/AGN_article_final_data/inform/mod','/home/kiril/github/AGN_article_final_data/inform/weight','/home/kiril/github/AGN_article_final_data/inform')
-
+'''
 NN(general_data[features].values,general_data["Y"].values,0.4,0.4,1024,100,'adam','binary_crossentropy',
 '/home/kiril/github/AGN_article_final_data/inform/predict','/home/kiril/github/AGN_article_final_data/inform/mod','/home/kiril/github/AGN_article_final_data/inform/weight','/home/kiril/github/AGN_article_final_data/inform')
 exit()
-
+'''
 for fuzzy_option in fuzzy_options:
     
     print(fuzzy_option)
-    '''
+    
     train_X = training_data[features].values
     general_X = general_data[features].values
 
@@ -70,10 +70,10 @@ for fuzzy_option in fuzzy_options:
         general_X, general_data, training_data, train_X, 
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "rf_not_b", info_columns, features)
-    '''
+    
 # scale features of the data:
-    #train_X, general_X = training_utils.scale_X_of_the_data(training_data[features], general_data[features])
-    '''
+    train_X, general_X = training_utils.scale_X_of_the_data(training_data[features], general_data[features])
+    
     params = {"penalty": ["l1", "l2"],#, "elasticnet"],
               'C': loguniform(1e0, 1e3)}
     
@@ -85,8 +85,8 @@ for fuzzy_option in fuzzy_options:
         general_X, general_data, training_data, train_X, 
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "logreg_not_b", info_columns, features)
-    '''
-    '''
+    
+    
     params = {'C': loguniform(1e0, 1e3),
 	          'gamma': loguniform(1e-4, 1e-2)}
     sv(fuzzy_option,'balanced',params, 
@@ -97,7 +97,7 @@ for fuzzy_option in fuzzy_options:
         general_X, general_data, training_data, train_X, 
     	fuzzy_dist_column, fuzzy_err_column, 
     	output_path, "svm_not_b", info_columns, features)
-    '''
+    
 	# scale features of the data:
     training_part, test_part = train_test_split(training_data, test_size=0.2, random_state=42)
 

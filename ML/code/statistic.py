@@ -4,14 +4,18 @@ import pandas as pd
 import numpy as np
 import math
 import os
+import sklearn.metrics as skmetrics
+
+from matplotlib import pyplot as plt
+import matplotlib.colors as mcolors
 
 path_save_eval = '/home/kiril/github/AGN_article_final_data/inform'
 
 path_classifire = '/home/kiril/github/ML_with_AGN/ML/code/results'
 name_classifire = os.listdir(path_classifire)
 
-fuzzy_options = ['normal']
-#fuzzy_options = ['normal', 'fuzzy_err', 'fuzzy_dist']
+#fuzzy_options = ['normal']
+fuzzy_options = ['normal', 'fuzzy_err', 'fuzzy_dist']
 
 def eval(y,y_pred,n):
 	count = 0
@@ -64,10 +68,31 @@ def eval(y,y_pred,n):
 
 	return ev
 
+#c=list(mcolors.TABLEAU_COLORS)
+c=np.append(list(mcolors.TABLEAU_COLORS),list(mcolors.BASE_COLORS))
+
+save_path = path_save_eval
 
 
-for cl in name_classifire:
-    for fuzzy_option in fuzzy_options:
+for fuzzy_option in fuzzy_options:
+    fig, ((ax1_p, ax2_p, ax3_p), (ax1_r, ax2_r, ax3_r)) = plt.subplots(2,3)		
+    fig.suptitle(f'PR_curve and ROC_curve general data')
+    ax1_p.set_xlabel('Thresholds')
+    ax1_p.set_ylabel('Precision')
+    ax2_p.set_xlabel('Thresholds')
+    ax2_p.set_ylabel('Recall')
+    ax3_p.set_xlabel('Recall')
+    ax3_p.set_ylabel('Precision')
+    ax1_r.set_xlabel('Thresholds')
+    ax1_r.set_ylabel('FPR')
+    ax2_r.set_xlabel('Thresholds')
+    ax2_r.set_ylabel('TPR')
+    ax3_r.set_xlabel('FPR')
+    ax3_r.set_ylabel('TPR')
+    fig.set_size_inches(12,10)
+    index=0
+    for cl in name_classifire:
+        
         data_general = pd.read_csv(f"{path_classifire}/{cl}/{fuzzy_option}/{fuzzy_option}_generalization.csv",sep=",",header=0)
         #print(data_general)
         label = []
@@ -78,6 +103,37 @@ for cl in name_classifire:
                 label.append(1)
             else: label.append(0)
         #print(label)
-
+        '''
         ev = eval(label,data_general['y_pred'],n)
         ev.to_csv(f'{path_save_eval}/{cl}_evaluate.csv', index=False)
+        '''
+        fpr, tpr, thresholds = skmetrics.roc_curve(label, data_general['y_prob_positive_class'],pos_label=1)
+        #print(len(fpr),len(tpr),len(thresholds))
+        roc_curve_df = pd.DataFrame({"fpr": fpr, "tpr": tpr,
+										"thresholds": thresholds})
+
+        precision, recall, thresholds = skmetrics.precision_recall_curve(label, data_general['y_prob_positive_class'])
+        pr_curve_df = pd.DataFrame({"precision": precision, "recall": recall, 
+                                        "thresholds": np.append(thresholds, 1)})
+        pr_curve_df = pr_curve_df[pr_curve_df['thresholds'] < 0.99]												
+
+        ax1_r.plot(roc_curve_df['thresholds'],roc_curve_df['fpr'],c=c[index],label=cl)
+        ax2_r.plot(roc_curve_df['thresholds'],roc_curve_df['tpr'],c=c[index],label=cl)
+        ax3_r.plot(roc_curve_df['fpr'],roc_curve_df['tpr'],c=c[index],label=cl)
+        
+        ax1_p.plot(pr_curve_df['thresholds'],pr_curve_df['precision'],c=c[index],label=cl)
+        ax2_p.plot(pr_curve_df['thresholds'],pr_curve_df['recall'],c=c[index],label=cl)
+        ax3_p.plot(pr_curve_df['recall'],pr_curve_df['precision'],c=c[index],label=cl)
+        index+=1
+
+    ax1_p.legend(loc=2, prop={'size': 5})
+    ax2_p.legend(loc=3, prop={'size': 5})
+    ax3_p.legend(loc=2, prop={'size': 5})
+    ax1_r.legend(loc=2, prop={'size': 5})
+    ax2_r.legend(loc=3, prop={'size': 5})
+    ax3_r.legend(loc=2, prop={'size': 5})
+    
+    fig.savefig(save_path+'/'+fuzzy_option+'PR_ROC_curve_5.png')	
+    plt.close(fig)
+
+
