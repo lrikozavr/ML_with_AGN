@@ -26,9 +26,7 @@ def fuzzy_dist(data):
     columns = data.columns.values
     count = len(data)
     rc = pd.DataFrame(np.array(['fuf']), columns=['word'])
-    
-    
-
+    #
     for col in columns:
         rc[col] = M(data[col],count)
         #print(rc[col])
@@ -53,14 +51,46 @@ def fuzzy_err(data):
     #print(count,columns)
 
     summ = []
-    max = -1
+    max = np.zeros(len(columns))
+    index=0
+    for col in columns:
+        for i in range(count):
+            if(data[col].iloc[i] > max[index]):
+                max[index]=data[col].iloc[i]
+        index+=1
+    np.zeros((count,))
 
     for i in range(count):
         sum = 0
+        index = 0
         for col in columns:
-            sum += data[col].iloc[i]
-        summ.append(sum)
-        if(sum > max):
-            max=sum
+            sum += (1 - data[col].iloc[i]/(max[index]+delta))**2
+            index += 1
+        summ.append(math.sqrt(sum/float(index)))
     print("fuzzy_err complite")
-    return summ,max
+    return summ
+
+def colors(data):
+    print(data)
+    list_name = data.columns.values
+    count = data.shape[0]
+    mags = int(data.shape[1]/2)
+    num_colours = sum(i for i in range(mags))
+    colours = np.zeros((count,num_colours))
+    colours_error = np.zeros((count,num_colours))
+    index = 0
+    colours_name, colours_error_name = [], []
+    data=np.array(data)
+    for j in range(mags):
+        for i in range(j, mags):
+            if(i!=j):
+                colours_name.append(f"{list_name[j*2]}&{list_name[i*2]}")
+                colours_error_name.append(f"{list_name[j*2+1]}&{list_name[i*2+1]}")
+                colours[:,index] = data[:,j*2] - data[:,i*2]
+                colours_error[:,index] = np.sqrt(data[:,j*2+1]**2 + data[:,i*2+1]**2)
+                index += 1
+    print(colours_name)
+    print(colours_error_name)
+    colours = pd.DataFrame(colours, columns=colours_name)
+    colours_error = pd.DataFrame(colours_error, columns=colours_error_name)
+    return colours, colours_error
