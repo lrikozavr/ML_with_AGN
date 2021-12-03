@@ -17,8 +17,10 @@ def Diff(data,flag_color):
 				colours[:,index] = data[:,j] - data[:,i]
 				index += 1
 	if(not flag_color):
+		print("data && colors")
 		Result = np.append(data,colours, axis=1)
 	else:
+		print("colors")
 		Result = colours
 	print("Different all Data")
 	print(Result.shape)
@@ -46,8 +48,8 @@ def DataP(data,flag_color):
 	data.info()
 	#data.sum()
 	data = np.array(data)
-	return Rou(Diff(data,flag_color)) #return  Diff(data,flag_color) #return data 
-	#return  Diff(data,flag_color)
+	#return Rou(Diff(data,flag_color)) #return  Diff(data,flag_color) #return data 
+	return  Diff(data,flag_color)
 
 def z_round(data1,data2):
 	data_1,data_2 = pd.DataFrame(),pd.DataFrame()

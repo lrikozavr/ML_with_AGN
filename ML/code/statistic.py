@@ -9,13 +9,18 @@ import sklearn.metrics as skmetrics
 from matplotlib import pyplot as plt
 import matplotlib.colors as mcolors
 
+legend_size = 10
+
 path_save_eval = '/home/kiril/github/AGN_article_final_data/inform'
 
 path_classifire = '/home/kiril/github/ML_with_AGN/ML/code/results'
+#path_classifire = '/home/kiril/github/AGN_article_final_data/inform/results'
 name_classifire = os.listdir(path_classifire)
 
 #fuzzy_options = ['normal']
-fuzzy_options = ['normal', 'fuzzy_err', 'fuzzy_dist']
+#fuzzy_options = ['normal', 'fuzzy_err', 'fuzzy_dist']
+fuzzy_options = ['fuzzy_err', 'fuzzy_dist']
+
 
 def eval(y,y_pred,n):
 	count = 0
@@ -50,7 +55,7 @@ def eval(y,y_pred,n):
 	ev = pd.DataFrame([np.array([Acc,pur_a,pur_not_a,com_a,com_not_a,f1,fpr,tnr,bAcc,k,mcc,BinBs])], 
     columns=['Accuracy','AGN_purity','nonAGN_precision','AGN_completness','nonAGN_completness','F1',
     'FPR','TNR','bACC','K','MCC','BinaryBS'])
-
+	'''
 	print("Accuracy 				[worst: 0; best: 1]:",              Acc)
 	print("AGN purity 				[worst: 0; best: 1]:",     pur_a)
 	print("nonAGN precision 			[worst: 0; best: 1]:",    pur_not_a)
@@ -65,14 +70,34 @@ def eval(y,y_pred,n):
 	print("K (Cohen's Kappa) 			[worst:-1; best:+1]:",		k)
 	print("MCC (Matthews Correlation Coef) 	[worst:-1; best:+1]:",		mcc)
 	print("BinaryBS (Brierscore) 			[worst: 1; best: 0]:", BinBs)
-
+	'''
 	return ev
+
+def i_need_more_eval(ax1_p, ax2_p, ax3_p, ax1_r, ax2_r, ax3_r, index, name, label, data_general_label):
+	fpr, tpr, thresholds = skmetrics.roc_curve(label, data_general_label, pos_label=1)
+	roc_curve_df = pd.DataFrame({"fpr": fpr, "tpr": tpr,
+									"thresholds": thresholds})
+	roc_curve_df = roc_curve_df[roc_curve_df['thresholds'] < 0.99]									
+	roc_curve_df.to_csv(f"{path_save_eval}/{name}_roc.csv", index=False)
+	precision, recall, thresholds = skmetrics.precision_recall_curve(label, data_general_label)
+	pr_curve_df = pd.DataFrame({"precision": precision, "recall": recall, 
+                                    "thresholds": np.append(thresholds, 1)})
+	pr_curve_df = pr_curve_df[pr_curve_df['thresholds'] < 0.99]	
+	pr_curve_df.to_csv(f"{path_save_eval}/{name}_pr.csv", index=False)
+
+	ax1_r.plot(roc_curve_df['thresholds'],roc_curve_df['fpr'],c=c[index],label=name)
+	ax2_r.plot(roc_curve_df['thresholds'],roc_curve_df['tpr'],c=c[index],label=name)
+	ax3_r.plot(roc_curve_df['fpr'],roc_curve_df['tpr'],c=c[index],label=name)
+
+	ax1_p.plot(pr_curve_df['thresholds'],pr_curve_df['precision'],c=c[index],label=name)
+	ax2_p.plot(pr_curve_df['thresholds'],pr_curve_df['recall'],c=c[index],label=name)
+	ax3_p.plot(pr_curve_df['recall'],pr_curve_df['precision'],c=c[index],label=name)
 
 #c=list(mcolors.TABLEAU_COLORS)
 c=np.append(list(mcolors.TABLEAU_COLORS),list(mcolors.BASE_COLORS))
 
 save_path = path_save_eval
-
+ml_class = ['dark', 'normal']
 
 for fuzzy_option in fuzzy_options:
     fig, ((ax1_p, ax2_p, ax3_p), (ax1_r, ax2_r, ax3_r)) = plt.subplots(2,3)		
@@ -89,8 +114,9 @@ for fuzzy_option in fuzzy_options:
     ax2_r.set_ylabel('TPR')
     ax3_r.set_xlabel('FPR')
     ax3_r.set_ylabel('TPR')
-    fig.set_size_inches(12,10)
+    fig.set_size_inches(25,20)
     index=0
+    
     for cl in name_classifire:
         
         data_general = pd.read_csv(f"{path_classifire}/{cl}/{fuzzy_option}/{fuzzy_option}_generalization.csv",sep=",",header=0)
@@ -103,37 +129,36 @@ for fuzzy_option in fuzzy_options:
                 label.append(1)
             else: label.append(0)
         #print(label)
-        '''
+        
         ev = eval(label,data_general['y_pred'],n)
         ev.to_csv(f'{path_save_eval}/{cl}_evaluate.csv', index=False)
-        '''
-        fpr, tpr, thresholds = skmetrics.roc_curve(label, data_general['y_prob_positive_class'],pos_label=1)
-        #print(len(fpr),len(tpr),len(thresholds))
-        roc_curve_df = pd.DataFrame({"fpr": fpr, "tpr": tpr,
-										"thresholds": thresholds})
-
-        precision, recall, thresholds = skmetrics.precision_recall_curve(label, data_general['y_prob_positive_class'])
-        pr_curve_df = pd.DataFrame({"precision": precision, "recall": recall, 
-                                        "thresholds": np.append(thresholds, 1)})
-        pr_curve_df = pr_curve_df[pr_curve_df['thresholds'] < 0.99]												
-
-        ax1_r.plot(roc_curve_df['thresholds'],roc_curve_df['fpr'],c=c[index],label=cl)
-        ax2_r.plot(roc_curve_df['thresholds'],roc_curve_df['tpr'],c=c[index],label=cl)
-        ax3_r.plot(roc_curve_df['fpr'],roc_curve_df['tpr'],c=c[index],label=cl)
         
-        ax1_p.plot(pr_curve_df['thresholds'],pr_curve_df['precision'],c=c[index],label=cl)
-        ax2_p.plot(pr_curve_df['thresholds'],pr_curve_df['recall'],c=c[index],label=cl)
-        ax3_p.plot(pr_curve_df['recall'],pr_curve_df['precision'],c=c[index],label=cl)
+        i_need_more_eval(ax1_p, ax2_p, ax3_p, ax1_r, ax2_r, ax3_r, index, cl, label, data_general['y_prob_positive_class'])
         index+=1
-
-    ax1_p.legend(loc=2, prop={'size': 5})
-    ax2_p.legend(loc=3, prop={'size': 5})
-    ax3_p.legend(loc=2, prop={'size': 5})
-    ax1_r.legend(loc=2, prop={'size': 5})
-    ax2_r.legend(loc=3, prop={'size': 5})
-    ax3_r.legend(loc=2, prop={'size': 5})
     
-    fig.savefig(save_path+'/'+fuzzy_option+'PR_ROC_curve_5.png')	
+    #for ind in range(5):
+    for ml_c in ml_class:
+        data_NN = pd.read_csv(f"{path_save_eval}/ml_{ml_c}_{1}_prob.csv",sep=",",header=0)
+        n=data_NN.shape[0]
+        label = []
+        for i in range(n):
+        	if(data_NN['y_prob'].iloc[i] > 0.5):
+        	    label.append(1)
+        	else:
+        	    label.append(0)
+        ev = eval(data_NN['Y'], label, n)
+        ev.to_csv(f"{path_save_eval}/{ml_c}_{1}_evaluate.csv", index=False)
+        i_need_more_eval(ax1_p, ax2_p, ax3_p, ax1_r, ax2_r, ax3_r, index, f"{ml_c}_{1}", data_NN['Y'], data_NN['y_prob'])
+        index+=1
+    
+    ax1_p.legend(loc=3, prop={'size': legend_size})
+    ax2_p.legend(loc=3, prop={'size': legend_size})
+    ax3_p.legend(loc=3, prop={'size': legend_size})
+    ax1_r.legend(loc=1, prop={'size': legend_size})
+    ax2_r.legend(loc=3, prop={'size': legend_size})
+    ax3_r.legend(loc=4, prop={'size': legend_size})
+    
+    fig.savefig(save_path+'/'+fuzzy_option+'PR_ROC_curve_all_g_.png')	
     plt.close(fig)
 
 

@@ -11,11 +11,12 @@ from keras.models import Model
 from keras.layers.normalization import BatchNormalization
 
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split,KFold
 import tensorflow as tf
 from keras import backend as K
 import numpy as np
 
+import sklearn.metrics as skmetrics
 
 def ImageDeepDenseNN(input_shape):
     inputs = Input(shape=input_shape)
@@ -80,7 +81,7 @@ def DeepDenseNN(features):
     Label = Dense(1,activation="sigmoid", kernel_initializer='he_uniform' )(layer_5)
     model = Model(input_img, Label)
     return model
-def DeepDarkDenseNN(features):
+def DeepDark_DenseNN(features):
     input_img = Input(shape=(features,))
     layer_1 = Dense(8, activation='linear', kernel_initializer='he_uniform' )(input_img)
     layer_2 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_1)
@@ -94,6 +95,18 @@ def DeepDarkDenseNN(features):
     model = Model(input_img, Label)
     return model
 
+def DeepDarkDenseNN(features):
+    input_img = Input(shape=(features,))
+    layer_1 = Dense(32, activation='linear', kernel_initializer='he_uniform' )(input_img)
+    layer_2 = Dense(64, activation='relu', kernel_initializer='he_uniform' )(layer_1)
+    layer_3 = Dense(32, activation='tanh', kernel_initializer='he_uniform' )(layer_2)
+    layer_4 = Dense(16, activation='relu', kernel_initializer='he_uniform' )(layer_3)
+    layer_5 = Dense(8, activation='tanh', kernel_initializer='he_uniform' )(layer_4)
+    layer_6 = Dense(4, activation='elu', kernel_initializer='he_uniform' )(layer_5)
+    Label = Dense(1,activation="sigmoid", kernel_initializer='he_uniform' )(layer_6)
+    model = Model(input_img, Label)
+    return model
+
 def NoDeepDenseNN(features):
     input_img = Input(shape=(features,))
     Label = Dense(1, activation='sigmoid', kernel_initializer='he_uniform' )(input_img)
@@ -102,11 +115,11 @@ def NoDeepDenseNN(features):
     return Model(input_img, Label)
     
 
-def SaveModel(model, path_model, path_weights):
+def SaveModel(model, path_model, path_weights, name):
     model_json = model.to_json()
-    with open(path_model, "w") as json_file:
+    with open(f"{path_model}_{name}", "w") as json_file:
         json_file.write(model_json)
-    model.save_weights(path_weights)
+    model.save_weights(f"{path_weights}_{name}")
     print("Model is saved to disk\n")
 
 def LoadModel(path_model, path_weights, optimizer, loss):
@@ -308,7 +321,7 @@ def eval(y,y_pred,n):
 
 	return ev
 
-def ml_volume(X_train,y_train,X_test,y_test,
+def ml_volume(train,label,X_train,y_train,X_test,y_test,
 	model,optimizer,loss,num_ep,batch_size,validation_split,
 	output_path_predict,path_save_eval,name):
 	
@@ -317,25 +330,36 @@ def ml_volume(X_train,y_train,X_test,y_test,
 		epochs=num_ep,
 		verbose=1,
 		batch_size=batch_size,
-		validation_split=validation_split)
+		validation_split=validation_split
+		#sample_weight=
+		)
 	model.evaluate(X_test, y_test, verbose=1)
 	model.summary()
-	Class = model.predict(X_test, batch_size)
-	#print(Class)
-	Class = np.array(Class)
+
 	
-	g=open(output_path_predict,'w')
+
+	Class = model.predict(train, batch_size)
+	#print(Class)
+	res = pd.DataFrame(np.array(Class), columns=['y_prob'])
+	res['Y'] = np.array(label)
+	res.to_csv(f'{path_save_eval}/ml_{name}_prob.csv', index=False)
+
+	'''
+	g=open(f"{output_path_predict}/{name}.csv",'w')
 	Class.tofile(g,"\n")
 	g.close()
-
-	ev = eval(Class,y_test,y_test.shape[0])
+	'''
+	ev = eval(Class,label,label.shape[0])
 	ev.to_csv(f'{path_save_eval}/ml_{name}_evaluate.csv', index=False)
+
+	
+	
 	return model
 
 
 def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,output_path_predict,output_path_mod,output_path_weight,path_save_eval):
-	X_train, X_test, y_train, y_test = train_test_split(train, label, 
-														test_size = test_size, random_state = 56) #0.4
+#	X_train, X_test, y_train, y_test = train_test_split(train, label, 
+#														test_size = test_size, random_state = 56) #0.4
 	#print(X_train, X_test, y_train, y_test)
 	
 	#from keras.utils import np_utils
@@ -347,21 +371,35 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	#num_ep = 15
 	features = train.shape[1]
 	print(features)
+	train = np.array(train)
+	kfold = KFold(n_splits=5, shuffle=False)
+	index=0
+	for train_index, test_index in kfold.split(train):
+		X_train = train[train_index]
+		y_train = label[train_index]
+    
+		X_test = train[test_index]
+		y_test = label[test_index]
 	
-	model = DeepDenseNN(features)	
-	model1 = ml_volume(X_train,y_train,X_test,y_test,
-	model,optimizer,loss,num_ep,batch_size,validation_split,
-	output_path_predict,path_save_eval,'normal')
-	
-	model = DeepDarkDenseNN(features)
-	model2 = ml_volume(X_train,y_train,X_test,y_test,
-	model,optimizer,loss,num_ep,batch_size,validation_split,
-	output_path_predict,path_save_eval,'dark')
+		model = DeepDenseNN(features)	
+		model1 = ml_volume(train,label,X_train,y_train,X_test,y_test,
+		model,optimizer,loss,num_ep,batch_size,validation_split,
+		output_path_predict,path_save_eval,f"normal_{index}")
+		SaveModel(model1,output_path_mod,output_path_weight,f"normal_{index}")
 
-	model = NoDeepDenseNN(features)
-	model3 = ml_volume(X_train,y_train,X_test,y_test,
-	model,optimizer,loss,num_ep,batch_size,validation_split,
-	output_path_predict,path_save_eval,'no')
+		model = DeepDarkDenseNN(features)
+		model2 = ml_volume(train,label,X_train,y_train,X_test,y_test,
+		model,optimizer,loss,num_ep,batch_size,validation_split,
+		output_path_predict,path_save_eval,f"dark_{index}")
+		SaveModel(model2,output_path_mod,output_path_weight,f"dark_{index}")
+
+		model = NoDeepDenseNN(features)
+		model3 = ml_volume(train,label,X_train,y_train,X_test,y_test,
+		model,optimizer,loss,num_ep,batch_size,validation_split,
+		output_path_predict,path_save_eval,f"no_{index}")
+		SaveModel(model3,output_path_mod,output_path_weight,f"no_{index}")
+		
+		index+=1
 
 	'''
 	model.compile(optimizer=optimizer, loss=loss, metrics=['acc'])
@@ -447,4 +485,4 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 	print("MCC (Matthews Correlation Coef) 	[worst:-1; best:+1]:",		(TP*TN-FP*FN)/math.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN)))
 	print("BinaryBS (Brierscore) 			[worst: 1; best: 0]:", (FP+FN)/(TP+FP+FN+TN))
 	'''
-	SaveModel(model,output_path_mod,output_path_weight)
+	

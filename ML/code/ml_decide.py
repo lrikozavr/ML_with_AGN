@@ -190,14 +190,16 @@ def sv(fuzzy_option,class_weight,params,
         fuzzy_dist_column, fuzzy_err_column, 
         output_path, experiment_name, info_columns, features):
     clf = svm.SVC(gamma='scale',
-                  kernel='rbf',
+                  #kernel='rbf',
+                  kernel='linear',
                   probability=True,
                   class_weight='balanced',
                   cache_size=5000,
                   random_state=476)
     
     clf_for_eval = svm.SVC(gamma='scale',
-                  kernel='rbf',
+                  #kernel='rbf',
+                  kernel='linear',
                   probability=True,
                   class_weight=class_weight,
                   cache_size=5000,

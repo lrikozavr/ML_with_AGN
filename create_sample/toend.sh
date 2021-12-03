@@ -665,8 +665,8 @@ del_dup() {
 	cou
 }
 
-all
-
+#all
+get_cross star_sh.csv "II/328/allwise" temp_all.csv 5
 #star="star_sh"
 #name=$(train_pipe $star.csv 2)
 #awk -F, '{if($4 != "" && $5 != "" && $6 != "" && $7 != "" && $18 != "" && $20 != "" && $22 != "" && $24 != "" && $26 != "" && $35 != "" && $37 != "" && $39 != ""){print $0}}' $name > $star.r.csv

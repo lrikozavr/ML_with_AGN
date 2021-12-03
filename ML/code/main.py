@@ -19,11 +19,13 @@ from ml import NN
 
 training_data = pd.read_csv("training_sample.csv", header=0, sep=',')
 general_data = pd.read_csv("main_sample.csv", header=0, sep=',')
-
+general_data = general_data.sample(frac=1, replace=True, random_state=1)
+#print(general_data)
 info_columns = ['name','type']
 
+fuzzy_options = ["normal"]
 #fuzzy_options = ["normal", "fuzzy_dist", "fuzzy_err"]
-fuzzy_options = ["fuzzy_dist", "fuzzy_err"]
+
 '''
 features = ['W1mag','W2mag','W3mag',
             #'e_W1mag','e_W2mag','e_W3mag',
@@ -38,8 +40,16 @@ features = ['W1mag&W2mag', 'W1mag&W3mag', 'W1mag&phot_g_mean_mag', 'W1mag&phot_b
 'W3mag&phot_g_mean_mag', 'W3mag&phot_bp_mean_mag', 'W3mag&phot_rp_mean_mag', 
 'phot_g_mean_mag&phot_bp_mean_mag', 'phot_g_mean_mag&phot_rp_mean_mag', 
 'phot_bp_mean_mag&phot_rp_mean_mag']
+features_n = ['W1mag&W2mag', 'W1mag&W3mag', 'W1mag&phot_g_mean_mag', 'W1mag&phot_bp_mean_mag', 'W1mag&phot_rp_mean_mag', 
+'W2mag&W3mag', 'W2mag&phot_g_mean_mag', 'W2mag&phot_bp_mean_mag', 'W2mag&phot_rp_mean_mag', 
+'W3mag&phot_g_mean_mag', 'W3mag&phot_bp_mean_mag', 'W3mag&phot_rp_mean_mag', 
+'phot_g_mean_mag&phot_bp_mean_mag', 'phot_g_mean_mag&phot_rp_mean_mag', 
+'phot_bp_mean_mag&phot_rp_mean_mag',
+'name']
 
-
+from graf import Many_Graf_pd
+Many_Graf_pd(general_data[features_n],"/home/kiril/github/AGN_article_final_data/inform/color_picture")
+exit()
 fuzzy_dist_column = ["fuzzy_dist"]
 fuzzy_err_column = ["fuzzy_err"]
 output_path = "./results"
@@ -63,7 +73,7 @@ def cor():
 
 NN(general_data[features],general_data["Y"].values,0.4,0.4,1024,100,'adam','binary_crossentropy',
 '/home/kiril/github/AGN_article_final_data/inform/predict','/home/kiril/github/AGN_article_final_data/inform/mod','/home/kiril/github/AGN_article_final_data/inform/weight','/home/kiril/github/AGN_article_final_data/inform')
-
+exit()
  
 def multi_classifire(general_data,training_data,fuzzy_dist_column,fuzzy_err_column,output_path,info_columns,features):
 
