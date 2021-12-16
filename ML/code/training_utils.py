@@ -107,12 +107,17 @@ def evaluate_on_cv(training_data, train_X, clf_for_eval, fuzzy_option, fuzzy_dis
 
 
     all_cv_metrics = pd.concat(all_cv_metrics)
-    
+
+
     metrics_mean = pd.DataFrame(all_cv_metrics.mean()).T
     metrics_std = pd.DataFrame(all_cv_metrics.std()).T
     
     return metrics_mean, metrics_std
 
+def pred__save(output_path_predict,data,test,clf):
+    
+    data['AGN_probability'] = np.array(clf.predict_proba(test)[:, 1])
+    data.to_csv(output_path_predict, index=False)
 
 def predict_and_pr_curve_on_cv(training_data, train_X, clf_for_eval, 
                                fuzzy_option, fuzzy_dist_column, fuzzy_err_column, xgb_flag=False):

@@ -35,8 +35,8 @@ data_sfg['name'] = "SFG"
 data_qso['name'] = "QSO"
 data_star['name'] = "STAR"
 
-data_agn['Y'] = 1
-data_sfg['Y'] = 0
+data_agn['Y'] = 0
+data_sfg['Y'] = 1
 data_qso['Y'] = 0
 data_star['Y'] = 0
 
@@ -47,7 +47,7 @@ data_agn_sfg_qso_star = data_agn_sfg_qso.append(data_star, ignore_index=True)
 
 data = data_agn_sfg_qso_star
 data = data.drop(['Name'], axis=1)
-print(data)
+#print(data)
 
 #Отсекаем изначально ненужное (Значения часто пустые)
 #data = data.drop(['e_Jmag','e_Hmag','e_Kmag','Jmag','Hmag','Kmag','e_W4mag','W4mag',
@@ -58,6 +58,11 @@ print(data)
 data_mags = data.drop(['RA','DEC','z','type','name','Y'], axis=1)
 
 data_dist, data_err = colors(data_mags)
+from fuzzy_err_calc import MCD
+dfsg = MCD(data_dist,0)
+dfsg.to_csv("MCD.csv")
+exit()
+
 data = pd.concat([data[['RA','DEC','z','type','name','Y']],data_dist,data_err], axis=1)
 data_dist['Y'] = data['Y']
 #data_err = data.drop(['RA','DEC','z','type','name','W1mag','W2mag','W3mag','Y',
@@ -68,7 +73,7 @@ data_dist['Y'] = data['Y']
 #                    #'e_gmag','e_rmag','e_imag','e_zmag','e_ymag',
 #                    'phot_g_mean_mag_error','phot_bp_mean_mag_error','phot_rp_mean_mag_error'], axis=1)
 
-print(data_err)
+#print(data_err)
 
 data['fuzzy_err'] = fuzzy_err(data_err)
 
@@ -86,7 +91,7 @@ dat0 = pd.DataFrame(np.array(Normali(data_dist_0, max)))
 
 data['fuzzy_dist'] = dat1.append(dat0, ignore_index=True)
 
-data.to_csv('main_sample.csv', index=False)
+data.to_csv('main_sample_sfg.csv', index=False)
 
 training_data = data.sample(20000, random_state=1)
-training_data.to_csv('training_sample.csv', index=False)
+training_data.to_csv('training_sample_sfg.csv', index=False)

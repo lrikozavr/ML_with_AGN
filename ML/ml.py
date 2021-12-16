@@ -342,7 +342,7 @@ def ml_volume(train,label,X_train,y_train,X_test,y_test,
 	#print(Class)
 	res = pd.DataFrame(np.array(Class), columns=['y_prob'])
 	res['Y'] = np.array(label)
-	res.to_csv(f'{path_save_eval}/ml_{name}_prob.csv', index=False)
+	res.to_csv(f'{path_save_eval}_{name}_prob.csv', index=False)
 
 	'''
 	g=open(f"{output_path_predict}/{name}.csv",'w')
@@ -350,7 +350,7 @@ def ml_volume(train,label,X_train,y_train,X_test,y_test,
 	g.close()
 	'''
 	ev = eval(Class,label,label.shape[0])
-	ev.to_csv(f'{path_save_eval}/ml_{name}_evaluate.csv', index=False)
+	ev.to_csv(f'{path_save_eval}_{name}_evaluate.csv', index=False)
 
 	
 	
@@ -392,13 +392,13 @@ def NN(train,label,test_size,validation_split,batch_size,num_ep,optimizer,loss,o
 		model,optimizer,loss,num_ep,batch_size,validation_split,
 		output_path_predict,path_save_eval,f"dark_{index}")
 		SaveModel(model2,output_path_mod,output_path_weight,f"dark_{index}")
-
+		'''
 		model = NoDeepDenseNN(features)
 		model3 = ml_volume(train,label,X_train,y_train,X_test,y_test,
 		model,optimizer,loss,num_ep,batch_size,validation_split,
 		output_path_predict,path_save_eval,f"no_{index}")
 		SaveModel(model3,output_path_mod,output_path_weight,f"no_{index}")
-		
+		'''
 		index+=1
 
 	'''

@@ -1,6 +1,7 @@
 #!/home/kiril/python_env_iron_ment/new_proj/bin/python
 # -*- coding: utf-8 -*-
 
+from numpy.core.defchararray import count
 import pandas as pd
 import numpy as np
 import math
@@ -94,3 +95,93 @@ def colors(data):
     colours = pd.DataFrame(colours, columns=colours_name)
     colours_error = pd.DataFrame(colours_error, columns=colours_error_name)
     return colours, colours_error
+
+def T0(data,n):
+    vec = []
+    for j in data.columns.values:
+        vec.append(M(data[j],n))
+    return np.array(vec)            
+
+def S0(data,t0,n):
+    count_col = len(data.columns.values)
+    mat = np.zeros((count_col,count_col))
+
+    for i in range(n):
+        x = np.array(data.iloc[i])
+        matrix = x - t0       
+        for j1 in range(count_col):
+            for j2 in range(count_col):
+                mat[j1][j2] += matrix[j1]*matrix[j2]
+        
+    #print("MAT",mat)
+    for j1 in range(count_col):
+        for j2 in range(count_col):
+            mat[j1][j2] = mat[j1][j2] / float(n)
+    #print("MAT/////////////",mat)
+    #print(n)
+    return np.linalg.inv(mat)
+    
+
+
+def MCD(data,deep_i):
+    print(deep_i)
+    deep_i+=1
+    n = data.shape[0]
+    count_col = len(data.columns.values)
+    t0 = T0(data,n)
+    #print(t0)
+    s0 = S0(data,t0,n)
+    
+    #print("s0000000000",s0)
+    if (np.linalg.det(s0) == 0):
+        print("det S0 = 0. MCD Complite")
+        print(deep_i)
+        return data
+    d = np.zeros(n)
+
+    max, index = 0, 0
+    for i in range(n):
+        x = np.array(data.iloc[i])
+        matrix = x - t0
+        res=0
+        for j1 in range(count_col):
+            sum = 0
+            for j2 in range(count_col):
+                sum += matrix[j2]*s0[j2][j1]
+            res += sum*matrix[j1]
+        d[i] = math.sqrt(res)
+        #if (d[i] > max):
+        #    max = d[i]
+        #    index = i
+    
+    ar_i = [i for i in range(n)]
+    
+    from matplotlib import pyplot as plt
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    fig.set_size_inches(10,10)
+    ax.scatter(ar_i,d)
+    fig.savefig(f"{deep_i}_d.png")
+    plt.close(fig)
+    
+    for i in range(n):
+        if(d[i]>7):
+            data = data.drop(i, axis=0)
+            data = data.reset_index(drop=True)
+
+    '''
+    t1=T0(data,n-1)
+
+    s1=S0(data,t1,n-1)
+
+    if (np.linalg.det(s0) <= np.linalg.det(s1)):
+        print("det S0 = det S1. MCD Complite")
+        print(deep_i)
+        return data
+    else:
+        MCD(data,deep_i)
+    '''
+    MCD(data,deep_i)
+
+
+

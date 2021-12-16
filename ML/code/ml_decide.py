@@ -80,10 +80,14 @@ def ml_volume_1(general_X, general_data, training_data, train_X, clf,
     general_data["y_pred"] = clf.predict(general_X)
     general_data["y_prob_positive_class"] = clf.predict_proba(general_X)[:, 1] 
     
+    #print(clf.get_params)
+    #best_param_df = pd.DataFrame(np.array(clf.get_params), index=[0])
+
     training_utils.save_results(output_path, experiment_name, fuzzy_option,
                  training_data, general_data, metrics, std, pr_curve, pd.DataFrame(), pd.DataFrame(),
                  info_columns, features)
     print("done.")
+    return clf
 
 def ml_volume_2(general_X, general_data, training_data, train_X, clf_for_eval, clf_gs, 
                 fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
@@ -135,7 +139,7 @@ def et(fuzzy_option, class_weight,
                                  random_state=476,
                                  n_jobs=-1)
     
-    ml_volume_1(general_X, general_data, training_data, train_X, clf, 
+    return ml_volume_1(general_X, general_data, training_data, train_X, clf, 
     	fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features)
 
@@ -181,7 +185,7 @@ def rf(fuzzy_option,class_weight,
                                  random_state=476,
                                  n_jobs=-1)
     
-    ml_volume_1(general_X, general_data, training_data, train_X, clf, 
+    return ml_volume_1(general_X, general_data, training_data, train_X, clf, 
     	fuzzy_option, fuzzy_dist_column, fuzzy_err_column, 
     	output_path, experiment_name, info_columns, features)
 
