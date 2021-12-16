@@ -165,10 +165,11 @@ def MCD(data,deep_i):
     plt.close(fig)
     
     for i in range(n):
-        if(d[i]>7):
+        if(d[i]>5.5):
             data = data.drop(i, axis=0)
-            data = data.reset_index(drop=True)
 
+    data = data.reset_index(drop=True)
+    return data
     '''
     t1=T0(data,n-1)
 
@@ -181,7 +182,46 @@ def MCD(data,deep_i):
     else:
         MCD(data,deep_i)
     '''
-    MCD(data,deep_i)
+    #MCD(data,deep_i)
 
+def Ell(data):
+    n = data.shape[0]
+    count_col = len(data.columns.values)
+    center = T0(data,n)
 
+    max = 0
+    summ = np.zeros(n)
+    for i in range(n):
+        sum=0
+        jj=0
+        for j in data.columns.values:
+            sum += (data[j].iloc[i] - center[jj])**2
+            jj+=1
+        summ[i]=math.sqrt(sum)
+        if (sum>max):
+            max = sum
+    index = np.argsort(summ)
+    #summ = np.sort(summ)
+    
+    f_i = np.zeros(count_col)
+    for i in range(count_col):
+        f_i[i] = index[n-i]
+    
+    R = max
+    mat = []
+    for i in f_i:
+        mat.append((data.iloc(i) - center)**2)
+    
+    mat_inv = np.linalg.inv(mat)
 
+    coef = np.zeros(count_col)
+
+    for i in range(count_col):
+        sum = 0
+        for j in range(count_col):
+            sum += mat_inv[i][j]*(R**2)
+        coef[i] = sum
+    
+    return center, coef
+    #(x[i]-center[i])^2/coef[i]+...=R^2
+    #for(i=1;i<15;i+=1){}
