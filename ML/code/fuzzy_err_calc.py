@@ -225,3 +225,22 @@ def Ell(data):
     return center, coef
     #(x[i]-center[i])^2/coef[i]+...=R^2
     #for(i=1;i<15;i+=1){}
+
+def D(data,n):
+    m=M(data)
+    sum=0
+    for i in range(n):
+        sum += (data[i] - m)**2
+    return math.sqrt(sum/float(n))
+
+def Gauss_cut(data,n):
+    m=M(data,n)
+    d=D(data,n)
+    #
+    rezult = []
+    c=0
+    for i in range(n):
+        if(math.e**(-((data[i]-m)**2)/(2*d**2))/(d*math.sqrt(2*math.pi)) > 0.1):
+            rezult.append(data[i])
+            c+=1
+    return rezult, c
