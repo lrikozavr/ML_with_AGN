@@ -1,9 +1,18 @@
 #!/bin/bash
-path="/home/kiril/github/AGN_article_final_data/sample"
+#path="/home/kiril/github/AGN_article_final_data/sample"
+path="$(pwd)/sample"
 sfg_dir="sfg"
 agn1_dir="agn_type_1"
 agn2_dir="agn_type_2"
 bll_dir="blazar"
+
+if [ -d $path ]
+then
+	echo "$path exist"
+else
+	mkdir $path
+fi
+
 
 for i in $sfg_dir $agn1_dir $agn2_dir $bll_dir
 do
@@ -164,9 +173,9 @@ printf("%s,%s,%s\n",$1,$2,"---") > "'$path/$agn2_dir/OC_K03.csv'"
 #░░░░▓░▓░░░▓░░░░░▓░░░░░▓
 #▓▓▓▓░░▓▓▓▓░░▓▓▓▓░░▓▓▓▓░
 #######################
-cat SDSS.agn1.tsv | tail -n +2 | sed 's!\t!,!g' > $path/$agn1_dir/SDSS.agn1.csv
-cat SDSS.agn2.tsv | tail -n +2 | sed 's!\t!,!g' > $path/$agn2_dir/SDSS.agn2.csv
-cat SDSS.sfg.tsv | tail -n +2 | sed 's!\t!,!g' > $path/$sfg_dir/SDSS.sfg.csv
+#cat SDSS.agn1.tsv | tail -n +2 | sed 's!\t!,!g' > $path/$agn1_dir/SDSS.agn1.csv
+#cat SDSS.agn2.tsv | tail -n +2 | sed 's!\t!,!g' > $path/$agn2_dir/SDSS.agn2.csv
+#cat SDSS.sfg.tsv | tail -n +2 | sed 's!\t!,!g' > $path/$sfg_dir/SDSS.sfg.csv
 ###########
 #░▓▓▓▓░▓░░░▓
 #▓░░░░░▓▓░▓▓

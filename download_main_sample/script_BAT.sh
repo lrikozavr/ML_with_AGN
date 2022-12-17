@@ -1,5 +1,5 @@
 #!/bin/bash
-url="https://cdsarc.unistra.fr/ftp/J/ApJS/235/4/table3.dat"
+url="https://cdsarc.u-strasbg.fr/ftp/J/ApJS/235/4/table3.dat"
 file_name="table"
 wget -O $file_name.dat $url
 ./cut.sh 95-102,104-111,164-168,175-177,179-198 $file_name.dat $file_name.tsv

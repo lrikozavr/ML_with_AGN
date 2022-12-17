@@ -1,5 +1,5 @@
 #!/bin/bash
-url="https://cdsarc.unistra.fr/ftp/J/MNRAS/421/1569/table1.dat.gz"
+url="https://cdsarc.u-strasbg.fr/ftp/J/MNRAS/421/1569/table1.dat.gz"
 file_name="table"
 arx_name="$file_name.dat.gz"
 wget -O $arx_name $url
